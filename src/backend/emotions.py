@@ -9,7 +9,24 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
+import mss
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+
+class ScreenCapture:
+    def __init__(self, monitor_index=1):
+        self.sct = mss.mss()
+        self.monitor = self.sct.monitors[monitor_index]  # 1 = primary monitor
+
+    def read(self):
+        """Mimic cv2.VideoCapture.read()"""
+        img = np.array(self.sct.grab(self.monitor))
+        frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+        return True, frame  # always return True like VideoCapture.read()
+
+    def release(self):
+        """Mimic cv2.VideoCapture.release()"""
+        self.sct.close()
 
 # command line argument
 ap = argparse.ArgumentParser()
@@ -109,7 +126,11 @@ elif mode == "display":
     emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
     # start the webcam feed
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
+    cap = ScreenCapture(1)
+
+    last_faces = []
+    
     while True:
         # Find haar cascade to draw bounding box around face
         ret, frame = cap.read()
@@ -125,7 +146,6 @@ elif mode == "display":
             cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
             prediction = model.predict(cropped_img)
             maxindex = int(np.argmax(prediction))
-            print(emotion_dict[maxindex])
             cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
         cv2.imshow('Video', cv2.resize(frame,(1600,960),interpolation = cv2.INTER_CUBIC))
