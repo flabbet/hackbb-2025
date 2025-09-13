@@ -61,8 +61,8 @@ def plot_model_history(model_history):
     plt.show()
 
 # Define data generators
-train_dir = 'data/train'
-val_dir = 'data/test'
+train_dir = 'backend/data/train'
+val_dir = 'backend/data/test'
 
 num_train = 28709
 num_val = 7178
@@ -115,11 +115,11 @@ if mode == "train":
             validation_data=validation_generator,
             validation_steps=num_val // batch_size)
     plot_model_history(model_info)
-    model.save_weights('model.h5')
+    model.save_weights('backend/model.h5')
 
 # emotions will be displayed on your face from the webcam feed
 elif mode == "display" or mode == "analyze":
-    model.load_weights('model.h5')
+    model.load_weights('backend/model.h5')
 
     # prevents openCL usage and unnecessary logging messages
     cv2.ocl.setUseOpenCL(False)
@@ -136,7 +136,7 @@ elif mode == "display" or mode == "analyze":
         ret, frame = cap.read()
         if not ret:
             break
-        facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = facecasc.detectMultiScale(gray,scaleFactor=1.3, minNeighbors=5)
 
