@@ -4,9 +4,9 @@ using Avalonia.Interactivity;
 
 namespace Humi.Views;
 
-public partial class MainWindow : Window
+public partial class AssistantWindow : Window
 {
-    public MainWindow()
+    public AssistantWindow()
     {
         InitializeComponent();
     }

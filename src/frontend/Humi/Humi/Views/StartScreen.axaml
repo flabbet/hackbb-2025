@@ -1,0 +1,132 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Humi.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Humi.Views.StartScreen"
+        x:DataType="viewModels:StartScreenViewModel"
+        Title="StartScreen">
+  
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <viewModels:StartScreenViewModel />
+  </Design.DataContext>
+  <Window.Resources>
+    <Color x:Key="BgColor">#1c1c1c</Color>
+    <Color x:Key="PanelColor">#262626</Color>
+    <Color x:Key="CardColor">#2F2F2F</Color>
+    <Color x:Key="MutedCardColor">#333333</Color>
+    <Color x:Key="AccentGreen">#43724F</Color>
+    <Color x:Key="AccentLightGreen">#7BB073</Color>
+    <Color x:Key="TextPrimary">#EAEAEA</Color>
+    <Color x:Key="TextMuted">#A8A8A8</Color>
+
+    <SolidColorBrush x:Key="WindowBackground" Color="{StaticResource BgColor}" />
+    <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}" />
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}" />
+    <SolidColorBrush x:Key="MutedCardBrush" Color="{StaticResource MutedCardColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentGreen}" />
+    <SolidColorBrush x:Key="AccentLightBrush" Color="{StaticResource AccentLightGreen}" />
+    <SolidColorBrush x:Key="PrimaryText" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="MutedText" Color="{StaticResource TextMuted}" />
+  </Window.Resources>
+  <Window.Styles>
+    
+    <Style Selector="TextBlock.title">
+      <Setter Property="Foreground" Value="{StaticResource PrimaryText}" />
+      <Setter Property="FontSize" Value="28" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{StaticResource CardBrush}" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <Style Selector="Border.smallcard">
+      <Setter Property="Background" Value="{StaticResource MutedCardBrush}" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource PrimaryText}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="14,12" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="120,*" ColumnDefinitions="*" Background="{StaticResource BgColor}">
+    <Border Grid.Row="0" Padding="20" CornerRadius="0,0,12,12">
+      <Grid ColumnDefinitions="1*, 2*">
+        <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+          <Image Source="/Assets/Humi.png"
+                 Width="92" Height="92" Stretch="UniformToFill"/>
+          <TextBlock Text="Humi" FontSize="56" VerticalAlignment="Center"
+                     Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="6,0,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" Margin="24" ColumnDefinitions="380,16,*">
+      <StackPanel Grid.Column="0" Spacing="18">
+        <Button Classes="primary" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StartAnalysisCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <TextBlock Text="🎥" FontSize="20" VerticalAlignment="Center"/>
+            <TextBlock Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
+          </StackPanel>
+        </Button>
+
+        <Border Classes="card" Margin="0,6,0,0">
+          <StackPanel>
+            <TextBlock Text="Rady na podstawie spotkań" FontSize="20" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <StackPanel Spacing="10">
+              <Border Classes="smallcard">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                  Wczoraj kilka osób wyglądało na smutne lub znużone. Warto wprowadzić krótsze, bardziej angażujące sesje lub sprawdzić, co obniżało ich motywację.
+                </TextBlock>
+              </Border>
+
+              <Border Classes="smallcard">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                  Dziś grupa miała momenty niskiego zaangażowania. Warto wprowadzić krótkie przerwy lub mini-ankiety w kolejnych spotkaniach.
+                </TextBlock>
+              </Border>
+
+              <Border Classes="smallcard">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                  Spróbuj zwiększyć udział mniej aktywnych uczestników, zadając im pytania otwarte.
+                </TextBlock>
+              </Border>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <Border Grid.Column="1"/>
+
+      <Border Grid.Column="2" Classes="card" Padding="20">
+        <StackPanel>
+          <TextBlock Text="Wykres emocji zespołu" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+          <TextBlock Text="Wykres przedstawia procentowy udział emocji w wybranym spotkaniu." 
+                     Foreground="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,14"/>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8" Margin="0,0,0,14">
+            <ComboBox SelectedIndex="0" Width="220" Height="36" Background="#1E1E1E" Foreground="{StaticResource PrimaryText}">
+              <ComboBoxItem Content="13.09.2025 12:09" />
+              <ComboBoxItem Content="10.09.2025 09:30" />
+            </ComboBox>
+          </StackPanel>
+            <Svg Path="/Assets/BarLineChart.svg"></Svg>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
