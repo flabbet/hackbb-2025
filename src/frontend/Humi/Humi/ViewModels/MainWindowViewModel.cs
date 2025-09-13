@@ -1,14 +1,24 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Humi.Analyzer;
+using Humi.Services;
 
 namespace Humi.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private string notificationText = "No notifications";
+
+    [ObservableProperty]
+    private ObservableCollection<int> _emotions = [];
+
+    [ObservableProperty]
+    private int? _selectedScreen;
 
     public string NotificationText
     {
@@ -18,6 +28,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
 
+    readonly private SimpleScreensProvider _screensProvider = new ();
+
     public MainWindowViewModel()
     {
         Analyzer.OnOutstandingEvent += (e) =>
@@ -26,20 +38,27 @@ public partial class MainWindowViewModel : ViewModelBase
         };
 
         Analyzer.Start();
-
-        StartBackend();
     }
-    
-    private void StartBackend()
+    public void Initialize(Window window)
     {
+        var screensId = _screensProvider.GetScreens(window);
+        foreach(var screenId in screensId)
+        {
+            Emotions.Add(screenId);
+        }
+    }
+    public void StartBackend()
+    {
+        Console.Write(SelectedScreen + 1);
+        var arguments = $"backend/run_backend.sh analyze {SelectedScreen + 1}";
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = "bash",
-            Arguments = "run_backend.sh",
-            WorkingDirectory = "/Users/flabbet/Git/Emotion-detection/src",
-            UseShellExecute = false,
+            Arguments = arguments,
+            WorkingDirectory = "../../../",
+            UseShellExecute = true,
             CreateNoWindow = true,
-            RedirectStandardOutput = true
+            RedirectStandardOutput = false
         };
         
         Process process = new Process
@@ -56,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
         };
         
         process.Start();
-        process.BeginOutputReadLine();
+        //process.BeginOutputReadLine();
     }
 
     private void ShowNotification(OutstandingEvent e)

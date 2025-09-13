@@ -25,6 +25,13 @@
     <Grid>
         <TextBlock Margin="50" Text="{Binding NotificationText}"/>
         <Image Source="/Assets/Humi.png" HorizontalAlignment="Right" Width="200" Height="200" />
+        <ListBox ItemsSource="{Binding Emotions}" SelectedItem="{Binding SelectedScreen}" SelectionChanged="ScreenSelected">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" FontSize="16"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 
 </Window>
