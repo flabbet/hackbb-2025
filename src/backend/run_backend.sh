@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source venv/bin/activate
+source backend/venv/bin/activate
 
-./emotions.py --mode $1 --screen $2 
+./backend/emotions.py --mode $1 --screen $2 
