@@ -18,7 +18,7 @@ public class EmotionAnalyzer
         OutstandingEventTimer.Start();
     }
 
-    // personId:emotionString\n
+    // personId:emotionString
     public void ProcessEventRaw(string eventInput)
     {
         if (string.IsNullOrEmpty(eventInput)) return;
@@ -28,10 +28,6 @@ public class EmotionAnalyzer
         if (!int.TryParse(split[0], out var id)) return;
 
         var emotion = split[1].Trim();
-
-        if (string.IsNullOrEmpty(emotion)) return;
-
-        if (emotion.Contains('\n')) emotion = emotion.Replace("\n", string.Empty);
 
         if (string.IsNullOrEmpty(emotion)) return;
 
