@@ -16,11 +16,6 @@ public partial class AssistantWindow : Window
     protected override void OnLoaded(RoutedEventArgs e)
     {
         AlignToBottomRight();
-        if (this.DataContext is MainWindowViewModel viewModel)
-        {
-            // Do something with viewModel
-            viewModel.Initialize(this); // Example method
-        }
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)
@@ -37,18 +32,5 @@ public partial class AssistantWindow : Window
         Position = new PixelPoint(
             screenSize.Width - windowSize.Width,
             screenSize.Height - windowSize.Height);
-    }
-
-    public void ScreenSelected(object? sender, SelectionChangedEventArgs e) {
-        if (sender is ListBox listBox)
-        {
-            // Get the ViewModel from the DataContext of the ListBox
-            if (listBox.DataContext is MainWindowViewModel vm)
-            {
-                // You now have access to the ViewModel
-                Console.WriteLine(vm.SelectedScreen);
-                vm.StartBackend();
-            }
-        }
     }
 }
