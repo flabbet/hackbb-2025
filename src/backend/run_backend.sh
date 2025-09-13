@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/zsh
 
-source backend/venv/bin/activate
-
-[ ! -p /tmp/my_pipe ] && mkfifo /tmp/my_pipe
-python3 backend/emotions.py --mode $1 --screen $2 > /tmp/emotions_feed
+cd /Users/flabbet/Git/Emotion-detection/env/bin
+source activate
+cd /Users/flabbet/Git/Emotion-detection/src
+python3 emotions.py --mode display

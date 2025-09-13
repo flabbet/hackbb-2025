@@ -1,8 +1,6 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Humi.ViewModels;
 
 namespace Humi.Views;
 
