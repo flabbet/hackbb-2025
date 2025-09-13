@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Text;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
@@ -14,11 +18,9 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private string notificationText = "No notifications";
 
-    [ObservableProperty]
-    private ObservableCollection<int> _emotions = [];
+    [ObservableProperty] private ObservableCollection<int> _emotions = [];
 
-    [ObservableProperty]
-    private int? _selectedScreen;
+    [ObservableProperty] private int? _selectedScreen;
 
     public string NotificationText
     {
@@ -28,25 +30,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
 
-    readonly private SimpleScreensProvider _screensProvider = new ();
+    readonly private SimpleScreensProvider _screensProvider = new();
 
     public MainWindowViewModel()
     {
-        Analyzer.OnOutstandingEvent += (e) =>
-        {
-            Dispatcher.UIThread.Invoke(() => ShowNotification(e));
-        };
+        Analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
 
         Analyzer.Start();
     }
+
     public void Initialize(Window window)
     {
         var screensId = _screensProvider.GetScreens(window);
-        foreach(var screenId in screensId)
+        foreach (var screenId in screensId)
         {
             Emotions.Add(screenId);
         }
     }
+
     public void StartBackend()
     {
         Console.Write(SelectedScreen + 1);
@@ -55,18 +56,44 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             FileName = "/bin/bash",
             Arguments = arguments,
-            WorkingDirectory = "../../../",
-            UseShellExecute = false,
+            WorkingDirectory = "../../../../../..",
+            UseShellExecute = true,
             CreateNoWindow = true,
-            RedirectStandardOutput = true
         };
-        
+
         Process process = new Process
         {
             StartInfo = startInfo
         };
-        
+
         process.Start();
+
+        RunPipeReader();
+    }
+
+    private void RunPipeReader()
+    {
+        string pipePath = "/tmp/emotions_feed";
+
+
+        // Read asynchronously in background
+        _ = Task.Run(async () =>
+        {
+            using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
+                useAsync: true);
+            using var reader = new StreamReader(fs, Encoding.UTF8);
+            Console.WriteLine("Listening to pipe");
+            while (true)
+            {
+                if (reader.EndOfStream)
+                {
+                    await Task.Delay(50); // Avoid busy waiting
+                    continue;
+                }
+
+                string? line = await reader.ReadLineAsync();
+            }
+        });
     }
 
     private void ShowNotification(OutstandingEvent e)
