@@ -1,3 +1,5 @@
+#!venv/bin/python3
+
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
