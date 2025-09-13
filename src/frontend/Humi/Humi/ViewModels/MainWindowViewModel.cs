@@ -53,12 +53,12 @@ public partial class MainWindowViewModel : ViewModelBase
         var arguments = $"backend/run_backend.sh analyze {SelectedScreen + 1}";
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
-            FileName = "bash",
+            FileName = "/bin/bash",
             Arguments = arguments,
             WorkingDirectory = "../../../",
-            UseShellExecute = true,
+            UseShellExecute = false,
             CreateNoWindow = true,
-            RedirectStandardOutput = false
+            RedirectStandardOutput = true
         };
         
         Process process = new Process
@@ -66,16 +66,7 @@ public partial class MainWindowViewModel : ViewModelBase
             StartInfo = startInfo
         };
         
-        process.OutputDataReceived += (sender, args) =>
-        {
-            if (!string.IsNullOrEmpty(args.Data))
-            {
-                Analyzer.ProcessEventRaw(args.Data);
-            }
-        };
-        
         process.Start();
-        //process.BeginOutputReadLine();
     }
 
     private void ShowNotification(OutstandingEvent e)

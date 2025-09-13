@@ -9,6 +9,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
+import sys
 import mss
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -150,7 +151,8 @@ elif mode == "display" or mode == "analyze":
             if mode == "display":
                 cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-            print(str(index) + ":" + str(emotion_dict[maxindex]))
+            sys.stdout.write(str(index) + ":" + str(emotion_dict[maxindex] + "\n"))
+            sys.stdout.flush()
 
         if mode == "display":
             cv2.imshow('Video', cv2.resize(frame,(1600,960),interpolation = cv2.INTER_CUBIC))
