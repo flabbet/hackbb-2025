@@ -6,6 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -25,9 +26,5 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Humi.Analyzer\Humi.Analyzer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Models\" />
     </ItemGroup>
 </Project>
