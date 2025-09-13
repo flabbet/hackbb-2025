@@ -2,5 +2,6 @@
 
 source backend/venv/bin/activate
 
-[ ! -p /tmp/my_pipe ] && mkfifo /tmp/my_pipe
+rm -f /tmp/emotions_feed
+[ ! -p /tmp/emotions_feed ] && mkfifo /tmp/emotions_feed
 python3 backend/emotions.py --mode $1 --screen $2 > /tmp/emotions_feed
