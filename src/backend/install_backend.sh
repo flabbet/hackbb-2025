@@ -6,9 +6,9 @@ REQ_FILE="requirements.txt"
 echo "Starting backend install..."
 echo "Model train data will be pulled from kaggle..."
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(pwd)"
 
-curl -L -o /tmp/fer2013.zip\\n  https://www.kaggle.com/api/v1/datasets/download/msambare/fer2013 > /dev/null
+curl -L -o /tmp/fer2013.zip https://www.kaggle.com/api/v1/datasets/download/msambare/fer2013 > /dev/null
 
 echo "Model data pull finished successfully."
 echo "Model data unpacking..."
