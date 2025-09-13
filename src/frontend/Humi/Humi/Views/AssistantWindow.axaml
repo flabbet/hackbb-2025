@@ -4,34 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Humi.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
+        x:Class="Humi.Views.AssistantWindow"
+        x:DataType="vm:AssistantViewModel"
         Icon="/Assets/avalonia-logo.ico"
         SystemDecorations="None"
         Height="200"
         Background="Transparent"
-        TransparencyBackgroundFallback="#252525"
+        TransparencyBackgroundFallback="White"
         Topmost="True"
-        Width="200"
+        Width="20"
         WindowStartupLocation="Manual"
         Title="Humi">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel />
+        <vm:AssistantViewModel />
     </Design.DataContext>
 
     <Grid>
-        <TextBlock Margin="50" Text="{Binding NotificationText}"/>
+        <Border IsVisible="{Binding IsShown}" Width="350" Margin="5" HorizontalAlignment="Left"  Background="#1c1c1c" CornerRadius="24 24 0 24">
+            <TextBlock FontSize="16" Padding="16" TextWrapping="Wrap" Text="{Binding NotificationText}"/>
+        </Border>
         <Image Source="/Assets/Humi.png" HorizontalAlignment="Right" Width="200" Height="200" />
-        <ListBox ItemsSource="{Binding Emotions}" SelectedItem="{Binding SelectedScreen}" SelectionChanged="ScreenSelected">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" FontSize="16"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Button Margin="24" Width="50" Height="50" IsVisible="{Binding IsShown}" CornerRadius="10" Background="#658F64" 
+                Command="{Binding CloseCommand}"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Image Source="/Assets/tick.png" Width="50" Height="50"></Image>
+        </Button>
     </Grid>
 
 </Window>

@@ -3,9 +3,14 @@
 public class EmotionAnalyzer
 {
     public System.Timers.Timer OutstandingEventTimer { get; private set; }
-    public List<PersonEmotion> LatestData { get; private set; } = new List<PersonEmotion>();
+    public Dictionary<int, List<PersonEmotion>> LatestData { get; private set; } = new Dictionary<int, List<PersonEmotion>>();
     
     public event Action<OutstandingEvent> OnOutstandingEvent;
+
+    private DateTime firstEntryTime;
+
+    public TimeSpan TimeSinceStart => LatestData == null || LatestData.Count == 0 ? TimeSpan.Zero : DateTime.Now - firstEntryTime;
+    
 
     public EmotionAnalyzer()
     {
@@ -40,21 +45,22 @@ public class EmotionAnalyzer
             Timestamp = DateTime.Now
         };
 
-        LatestData.Add(newData);
+        if (LatestData.Count == 0) firstEntryTime = DateTime.Now;
+        LatestData.TryAdd(id, new List<PersonEmotion>());
+        LatestData[id].Add(newData);
     }
 
     private void ProcessOutstandingEvents()
     {
-        List<PersonEmotion> dataFromLastInterval = GatherDataFromInterval(DateTime.Now - TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
-        List<PersonEmotion> dataFromLatestInterval = GatherDataFromInterval(DateTime.Now - TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
-        if (dataFromLastInterval.Count == 0 && dataFromLatestInterval.Count == 0) return;
-        
         bool handled = false;
-        handled = ProcessEmotionTransitions(dataFromLastInterval, dataFromLatestInterval);
-        if (handled) return;
+        if (TimeSinceStart < TimeSpan.FromSeconds(50))
+        {
+            handled = ProcessInitialEmotions(LatestData);
+            if (handled) return;
+        }
     }
     
-    private List<PersonEmotion> GatherDataFromInterval(DateTime startTime, TimeSpan duration)
+    /*private List<PersonEmotion> GatherDataFromInterval(DateTime startTime, TimeSpan duration)
     {
         DateTime endTime = startTime + duration;
         return LatestData.Where(e => e.Timestamp >= startTime && e.Timestamp <= endTime).ToList();
@@ -76,27 +82,51 @@ public class EmotionAnalyzer
         }
         
         return false;
+    }*/
+    
+    private bool ProcessInitialEmotions(Dictionary<int, List<PersonEmotion>> data)
+    {
+        Emotion dominantEmotion = GetDominantEmotionOfMajority(data);
+        if (dominantEmotion == Emotion.Sad)
+        {
+            OnOutstandingEvent?.Invoke(new OutstandingEvent
+            {
+                EventText = "Wygląda na to, że zespół jest w ponurych humorach, spróbuj poprowadzić to spotkanie w luźniejszej formie. Możesz również pochwalić za ostatnie sukcesy",
+                NotificationEmotion = Emotion.Sad
+            });
+            return true;
+        }
+        return false;
+    }
+
+    private Emotion GetDominantEmotionOfMajority(Dictionary<int, List<PersonEmotion>> data)
+    {
+        Dictionary<Emotion, int> emotionCounts = new();
+        foreach (var personData in data.Values)
+        {
+            if (personData.Count == 0) continue;
+            Emotion getDominant = GetDominantEmotion(personData);
+            emotionCounts.TryAdd(getDominant, 0);
+            
+            emotionCounts[getDominant]++;
+        }
+        
+        if (emotionCounts.Count == 0) return Emotion.Neutral;
+        return emotionCounts.OrderByDescending(e => e.Value).First().Key;
     }
     
     private Emotion GetDominantEmotion(List<PersonEmotion> data)
     {
-        if (data.Count == 0) return Emotion.Neutral;
+        if (data == null || data.Count == 0) return Emotion.Neutral;
 
-        var emotionCounts = new Dictionary<Emotion, int>();
+        Dictionary<Emotion, int> emotionCounts = new();
         foreach (var entry in data)
         {
-            if (!emotionCounts.TryAdd(entry.DominantEmotion, 1))
-            {
-                emotionCounts[entry.DominantEmotion]++;
-            }
+            emotionCounts.TryAdd(entry.DominantEmotion, 0);
+            emotionCounts[entry.DominantEmotion]++;
         }
 
         return emotionCounts.OrderByDescending(e => e.Value).First().Key;
-    }
-
-    private bool SomeoneGotAngered(Emotion last, Emotion latest)
-    {
-        return last != Emotion.Angry && latest == Emotion.Angry;
     }
 }
 
