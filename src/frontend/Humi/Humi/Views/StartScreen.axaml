@@ -98,7 +98,7 @@
           </StackPanel>
         </Button>
 
-        <Border IsVisible="{Binding !IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">
+        <Border IsVisible="{Binding !IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0" Height="450">
           <StackPanel>
             <TextBlock Classes="appTextBlock" Text="Analiza spotkania" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
             <ItemsControl ItemsSource="{Binding PostAnalysisTips}">
@@ -204,6 +204,7 @@
           </StackPanel>
           <lvc:CartesianChart Grid.Row="3"
               LegendPosition="Hidden"
+              EasingFunction="{x:Null}"
               MinWidth="100"
               MinHeight="430"
               Background="#2F2F2F"

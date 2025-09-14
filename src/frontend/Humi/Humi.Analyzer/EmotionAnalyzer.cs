@@ -204,6 +204,18 @@ public class EmotionAnalyzer
             
             return true;
         }
+        
+        if (dominantEmotion == Emotion.Happy)
+        {
+            OnOutstandingEvent?.Invoke(new OutstandingEvent
+            {
+                EventText =
+                    "Większość osób wydaje się być zadowolona, świetna robota! Utrzymuj pozytywną atmosferę i kontynuuj dobrą pracę.",
+                NotificationEmotion = Emotion.Sad
+            });
+            
+            return true;
+        }
 
         return false;
     }

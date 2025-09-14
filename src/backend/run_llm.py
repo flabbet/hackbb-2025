@@ -74,7 +74,7 @@ def summarize_with_model(llm_model_name: str, context: str, text: str) -> str:
     
     {text}
     
-    Please summarize the transcript."""
+    Please summarize the transcript and write it in Polish."""
 
     headers = {"Content-Type": "application/json"}
     data = {"model": llm_model_name, "prompt": prompt}

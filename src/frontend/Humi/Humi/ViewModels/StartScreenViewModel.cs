@@ -25,19 +25,19 @@ public partial class StartScreenViewModel : ViewModelBase
     private bool analysisStarted;
     private string summary = "Podsumowanie pojawi się tutaj po zakończeniu analizy.";
     private AssistantViewModel assistantViewModel;
-    
+
     public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
     public BackendWorker BackendWorker { get; } = new BackendWorker();
     public RelayCommand StartAnalysisCommand { get; }
     public ObservableCollection<string> PostAnalysisTips { get; } = new ObservableCollection<string>();
-    
+
     public string Summary
     {
         get => summary;
         set => SetProperty(ref summary, value);
     }
-    
-    private readonly GraphDataLoaderUtility _graphLoader =  new GraphDataLoaderUtility();
+
+    private readonly GraphDataLoaderUtility _graphLoader = new GraphDataLoaderUtility();
     [ObservableProperty] public GraphData data;
     [ObservableProperty] public string choosenDate;
     [ObservableProperty] public ObservableCollection<string> availableDates = [];
@@ -59,7 +59,8 @@ public partial class StartScreenViewModel : ViewModelBase
         BackendWorker.DataReceived += Analyzer.ProcessEventRaw;
         Analyzer.OnPersonCountChanged += count => NumberOfPeopleInMeetup = count;
         Analyzer.EmotionCountChanged += OnEmotionCountChanged;
-        Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Humi", "data"));
+        Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Humi", "data"));
         foreach (var key in Data.Keys)
         {
             AvailableDates.Add(key);
@@ -111,11 +112,13 @@ public partial class StartScreenViewModel : ViewModelBase
         {
             _chartValues[emotion] = ++value;
         }
+
         List<int> result = [];
         foreach (var t in _chartValues)
         {
             result.Add(t.Value);
         }
+
         Series = new ISeries[]
         {
             new ColumnSeries<int>
@@ -132,7 +135,7 @@ public partial class StartScreenViewModel : ViewModelBase
         {
             new Axis
             {
-                Labels = ["Neutralny", "Szczęśliwy","Przerażony", "Zły","Zaskoczony", "Smutny"],
+                Labels = ["Neutralny", "Szczęśliwy", "Przerażony", "Zły", "Zaskoczony", "Smutny"],
                 LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
                 TextSize = 12,
                 SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
@@ -168,23 +171,19 @@ public partial class StartScreenViewModel : ViewModelBase
         MeetupDuration = "00:00";
         ShowScreenPicker();
     }
-    
+
     private void ShowScreenPicker()
     {
         if (analysisStarted)
         {
             return;
-        };
-        
+        }
+
+        ;
+
         analysisStarted = true;
         Analyzer.Start();
-        BackendWorker.SummaryReceived += (summary) =>
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                Summary = summary;
-            });
-        };
+        BackendWorker.SummaryReceived += (summary) => { Dispatcher.UIThread.Invoke(() => { Summary = summary; }); };
         var screenSelectorWindow = new Views.ScreenSelector();
         screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
             OperatingSystem.IsMacOS() ? new MacOsScreenshotUtility() :
@@ -213,18 +212,19 @@ public partial class StartScreenViewModel : ViewModelBase
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
         BackendWorker.StopBackend();
         Analyzer.Stop();
-        
+
         PostAnalysisTips.Clear();
         foreach (var tip in Analyzer.PostAnalysisEvents)
         {
+            if (PostAnalysisTips.Contains(tip.EventText)) continue;
             PostAnalysisTips.Add(tip.EventText);
         }
-        
+
         analysisStarted = false;
         NumberOfPeopleInMeetup = 0;
         ShowSummaryScreen();
     }
-    
+
     private void ShowSummaryScreen()
     {
         var summaryScreen = new Views.SummaryScreen();
@@ -237,7 +237,7 @@ public partial class StartScreenViewModel : ViewModelBase
         {
             desktop.MainWindow.WindowState = WindowState.Minimized;
         }
-        
+
         summaryScreen.Show();
     }
 
