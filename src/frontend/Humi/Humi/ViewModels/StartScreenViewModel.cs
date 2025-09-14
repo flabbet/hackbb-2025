@@ -1,8 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Timers;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
@@ -10,13 +8,13 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Humi.Analyzer;
-using ExCSS;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.Painting.Effects;
 using SkiaSharp;
 using Humi.Models;
+using System.Collections.Generic;
 
 namespace Humi.ViewModels;
 
@@ -44,15 +42,23 @@ public partial class StartScreenViewModel : ViewModelBase
     [ObservableProperty] public string choosenDate;
     [ObservableProperty] public ObservableCollection<string> availableDates = [];
     [ObservableProperty] public ISeries[] series;
-    
+
+    private readonly Dictionary<Emotion, int> _chartValues = [];
 
     private readonly Timer _timer;
     private TimeSpan _elapsedTime;
 
     public StartScreenViewModel()
     {
+        _chartValues.Add(Emotion.Neutral, 0);
+        _chartValues.Add(Emotion.Happy, 0);
+        _chartValues.Add(Emotion.Fear, 0);
+        _chartValues.Add(Emotion.Angry, 0);
+        _chartValues.Add(Emotion.Surprised, 0);
+        _chartValues.Add(Emotion.Sad, 0);
         BackendWorker.DataReceived += Analyzer.ProcessEventRaw;
         Analyzer.OnPersonCountChanged += count => NumberOfPeopleInMeetup = count;
+        Analyzer.EmotionCountChanged += OnEmotionCountChanged;
         Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Humi", "data"));
         foreach (var key in Data.Keys)
         {
@@ -64,13 +70,11 @@ public partial class StartScreenViewModel : ViewModelBase
             ChoosenDate = AvailableDates.FirstOrDefault();
             Series = new ISeries[]
             {
-                new LineSeries<int>
+                new ColumnSeries<int>
                 {
                     Values = Data[ChoosenDate],
-                    Fill = null,
+                    Fill = new SolidColorPaint(new SKColor(101, 143, 100, 255)),
                     Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
-                    GeometryFill = new SolidColorPaint(SKColors.White),
-                    GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
                 }
             };
         }
@@ -92,17 +96,43 @@ public partial class StartScreenViewModel : ViewModelBase
     {
         Series = new ISeries[]
         {
-            new LineSeries<int>
+            new ColumnSeries<int>
             {
                 Values = Data[ChoosenDate],
-                Fill = null,
+                Fill = new SolidColorPaint(new SKColor(101, 143, 100, 255)),
                 Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
-                GeometryFill = new SolidColorPaint(SKColors.White),
-                GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
             }
         };
-    } 
-    
+    }
+
+    private void OnEmotionCountChanged(Emotion emotion)
+    {
+        Console.WriteLine($"OnEmotionCountChanged called {emotion}");
+        foreach (var t in _chartValues)
+        {
+            Console.WriteLine(t.Key);
+            Console.WriteLine(t.Value);
+        }
+        if (_chartValues.TryGetValue(emotion, out int value))
+        {
+            _chartValues[emotion] = ++value;
+        }
+        List<int> result = [];
+        foreach (var t in _chartValues)
+        {
+            result.Add(t.Value);
+        }
+        Series = new ISeries[]
+        {
+            new ColumnSeries<int>
+            {
+                Values = result,
+                Fill = new SolidColorPaint(new SKColor(101, 143, 100, 255)),
+                Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
+            }
+        };
+    }
+
     public Axis[] XAxes { get; set; }
         = new Axis[]
         {
@@ -183,6 +213,8 @@ public partial class StartScreenViewModel : ViewModelBase
     [RelayCommand]
     private void StopAnalysis()
     {
+        AssistantWindowManager.Assistant.Close();
+        AssistantWindowManager.Assistant = null;
         _timer.Stop();
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
         BackendWorker.StopBackend();

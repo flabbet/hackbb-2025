@@ -115,6 +115,25 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="693">
+              <ItemsControl ItemsSource="{Binding PostAnalysisTips}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Vertical" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="system:String">
+                    <Border Classes="smallcard">
+                      <TextBlock Text="{Binding}" Classes="appTextBlock" 
+                                 TextWrapping="Wrap" 
+                                 Foreground="{StaticResource PrimaryText}" 
+                                 FontSize="16"/>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
             <TextBlock Classes="appTextBlock" Text="Podsumowanie AI" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
             <Border Classes="smallcard">
               <TextBlock Text="{Binding Summary}" Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16"/>

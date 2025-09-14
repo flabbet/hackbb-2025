@@ -44,11 +44,11 @@ public class ScreenSelectorViewModel : ViewModelBase
     
     private void SelectScreen(int id)
     {
-        AssistantWindow assistantWindow = new AssistantWindow();
-        assistantWindow.DataContext = new AssistantViewModel(assistantWindow, id, Analyzer, worker);
+        AssistantWindow assistant = new AssistantWindow();
+        AssistantWindowManager.Assistant = assistant;
+        AssistantWindowManager.Assistant.DataContext = new AssistantViewModel(AssistantWindowManager.Assistant, id, Analyzer, worker);
         
         owningWindow.Close();
-        
-        assistantWindow.Show();
+        assistant.Show();
     }
 }

@@ -11,6 +11,7 @@ public class EmotionAnalyzer
 
     public event Action<OutstandingEvent> OnOutstandingEvent;
     public event Action<int> OnPersonCountChanged;
+    public event Action<Emotion> EmotionCountChanged;
 
     private DateTime firstEntryTime;
     private bool initialEmotionProcessed = false;
@@ -62,6 +63,8 @@ public class EmotionAnalyzer
         if (LatestData.Count == 0) firstEntryTime = DateTime.Now;
         LatestData.TryAdd(id, new List<PersonEmotion>());
         LatestData[id].Add(newData);
+
+        EmotionCountChanged?.Invoke(dominantEmotion);
     }
 
     private void ProcessOutstandingEvents()
