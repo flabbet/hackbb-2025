@@ -29,7 +29,7 @@
                        FontSize="36" Foreground="{StaticResource PrimaryTextBrush}"
                        HorizontalAlignment="Center" />
             <TextBlock FontSize="36" Foreground="{StaticResource PrimaryTextBrush}" HorizontalAlignment="Center" FontWeight="Bold">
-                Najczęściej występowało się 
+                Najczęściej występowało  
                 <Run Text="{Binding TopValueName}" />
                 i 
                 <Run Text="{Binding SecondTopValueName}" />.
