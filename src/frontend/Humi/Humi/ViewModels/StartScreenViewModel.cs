@@ -82,11 +82,11 @@ public partial class StartScreenViewModel : ViewModelBase
 
     private void StartAnalysis()
     {
-        ShowScreenPicker();
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
         _timer.Start();
         _elapsedTime = TimeSpan.Zero;
         MeetupDuration = "00:00";
+        ShowScreenPicker();
     } 
     
     private void ShowScreenPicker()
@@ -104,7 +104,6 @@ public partial class StartScreenViewModel : ViewModelBase
             desktop.MainWindow.WindowState = WindowState.Minimized;
         }
 
-        IsMetupAnalysisActive = !IsMetupAnalysisActive;
         _timer.Start();
         _elapsedTime = TimeSpan.Zero;
         MeetupDuration = "00:00";
