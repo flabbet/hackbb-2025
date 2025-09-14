@@ -19,6 +19,17 @@ public partial class AssistantViewModel : ViewModelBase
     private string notificationText =
         "Wygląda na to, że zespół jest w ponurych humorach, spróbuj poprowadzić to spotkanie w luźniejszej formie. Możesz również pochwalić za ostatnie sukcesy";
 
+    private string notificationLottie;
+    
+    private IDisposable notificationTimer;
+    
+    
+    public string NotificationLottie 
+    {
+        get => notificationLottie;
+        set => SetProperty(ref notificationLottie, value);
+    }
+
     public string NotificationText
     {
         get => notificationText;
@@ -59,13 +70,21 @@ public partial class AssistantViewModel : ViewModelBase
     {
         owningWindow.Width = 550;
         NotificationText = e.EventText;
+        NotificationLottie = LottieFromEmotion(e.NotificationEmotion);
         IsShown = true;
-        DispatcherTimer.RunOnce(CloseNotification, TimeSpan.FromSeconds(15));
+        notificationTimer?.Dispose();
+        notificationTimer = DispatcherTimer.RunOnce(CloseNotification, TimeSpan.FromSeconds(15));
+    }
+    
+    private string LottieFromEmotion(Emotion emotion)
+    {
+        return "/Assets/humi_talking.json";
     }
 
     private void CloseNotification()
     {
         NotificationText = "";
+        NotificationLottie = "/Assets/humi_idle.json";
         owningWindow.Width = 200;
         IsShown = false;
     }
