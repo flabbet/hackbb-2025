@@ -14,7 +14,7 @@ using GraphData = System.Collections.Generic.Dictionary<string, System.Collectio
 
 public partial class SummaryScreenViewModel : ViewModelBase
 {
-    private readonly GraphDataLoaderUtility _graphLoader =  new GraphDataLoaderUtility();
+    private readonly GraphDataLoaderUtility _graphLoader = new GraphDataLoaderUtility();
     [ObservableProperty] public GraphData data;
     [ObservableProperty] public string choosenDate;
     [ObservableProperty] public ObservableCollection<string> availableDates = [];
@@ -38,12 +38,13 @@ public partial class SummaryScreenViewModel : ViewModelBase
         "złość"
     };
 
-    
+
     public SummaryScreenViewModel()
     {
-        Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Humi", "data"));
+        Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Humi", "data"));
         ChoosenDate = Data.Keys.First();
-        
+
         int sum = Data[ChoosenDate].Sum();
         neutralPercent = (int)Math.Round((double)Data[ChoosenDate][0] / sum * 100);
         happyPercent = (int)Math.Round((double)Data[ChoosenDate][1] / sum * 100);
@@ -51,12 +52,12 @@ public partial class SummaryScreenViewModel : ViewModelBase
         sadPercent = (int)Math.Round((double)Data[ChoosenDate][3] / sum * 100);
         suprisedPercent = (int)Math.Round((double)Data[ChoosenDate][4] / sum * 100);
         angryPercent = (int)Math.Round((double)Data[ChoosenDate][5] / sum * 100);
-        
+
         var top2Indexes = Data[ChoosenDate]
-            .Select((value, index) => new { value, index })   
-            .OrderByDescending(x => x.value)                 
-            .Take(2)                                        
-            .Select(x => x.index)                           
+            .Select((value, index) => new { value, index })
+            .OrderByDescending(x => x.value)
+            .Take(2)
+            .Select(x => x.index)
             .ToArray();
 
         topValueName = emotionNamesAlternatives[top2Indexes[0]];
@@ -65,10 +66,10 @@ public partial class SummaryScreenViewModel : ViewModelBase
         if (top2Indexes.Contains(0) || top2Indexes.Contains(1))
         {
             topText = "Twoje spotkanie zakończyło się spokojnie.";
-        } else {
+        }
+        else
+        {
             topText = "Twoje spotkanie zakończyło się nie spokojnie.";
         }
     }
-    
-    
 }

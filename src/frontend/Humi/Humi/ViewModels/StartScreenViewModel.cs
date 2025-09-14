@@ -107,12 +107,6 @@ public partial class StartScreenViewModel : ViewModelBase
 
     private void OnEmotionCountChanged(Emotion emotion)
     {
-        Console.WriteLine($"OnEmotionCountChanged called {emotion}");
-        foreach (var t in _chartValues)
-        {
-            Console.WriteLine(t.Key);
-            Console.WriteLine(t.Value);
-        }
         if (_chartValues.TryGetValue(emotion, out int value))
         {
             _chartValues[emotion] = ++value;
