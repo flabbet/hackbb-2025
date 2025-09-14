@@ -25,11 +25,19 @@
         <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc6.1" />
         <PackageReference Include="Lottie" Version="11.3.0.2" />
         <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc6.1" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0" />
         <PackageReference Include="SkiaSharp" Version="3.119.0" />
         <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.0.4" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Humi.Analyzer\Humi.Analyzer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\SummaryScreen.axaml.cs">
+        <DependentUpon>SummaryScreen.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>

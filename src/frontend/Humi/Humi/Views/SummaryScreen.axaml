@@ -1,0 +1,108 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Humi.ViewModels"
+        xmlns:models="clr-namespace:Humi.Models"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="viewModels:SummaryScreenViewModel"
+        x:Class="Humi.Views.SummaryScreen"
+        Background="#1c1c1c"
+        Title="SummaryScreen">
+
+    <Design.DataContext>
+        <viewModels:SummaryScreenViewModel/>
+    </Design.DataContext>
+
+    <Window.Resources>
+        <Color x:Key="BgColor">#171717</Color>
+        <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+        <Color x:Key="MutedTextColor">#BFBFBF</Color>
+        <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}" />
+        <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+    </Window.Resources>
+
+    <Grid RowDefinitions="Auto, *" Margin="24" >
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Spacing="16" Margin="0,70,0,40">
+            <TextBlock Text="{Binding TopText}"
+                       FontSize="36" Foreground="{StaticResource PrimaryTextBrush}"
+                       HorizontalAlignment="Center" />
+            <TextBlock FontSize="36" Foreground="{StaticResource PrimaryTextBrush}" HorizontalAlignment="Center" FontWeight="Bold">
+                Najczęściej występowało się 
+                <Run Text="{Binding TopValueName}" />
+                i 
+                <Run Text="{Binding SecondTopValueName}" />.
+            </TextBlock>
+        </StackPanel>
+        <Grid Grid.Row="1" RowDefinitions="320,320" ColumnDefinitions="380,380,380" HorizontalAlignment="Center" >
+           <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_neutral.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Neutralny " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="NeutralPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_happy.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Szczęśliwy " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="HappyPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="2" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_frightened.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Przerażony " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="FrightenedPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_sad.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Smutny " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="SadPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_suprised.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Zaskoczony " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="SuprisedPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" Grid.Row="1" Grid.Column="2" Margin="70,40,70,40">
+                <Lottie Path="/Assets/humi_angry.json" />
+                <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" FontSize="29" Foreground="{StaticResource PrimaryTextBrush}" Margin="0,24,0,0">
+                    <Run Text="Zły " />
+                    <Run FontWeight="Bold">
+                        <Run.Text>
+                            <Binding Path="AngryPercent" StringFormat="{}{0}%"/>
+                        </Run.Text>
+                    </Run>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
