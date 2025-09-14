@@ -73,7 +73,7 @@ public partial class AssistantViewModel : ViewModelBase
 
         process.Start();
 
-        RunPipeReader();
+        Dispatcher.UIThread.Post(RunPipeReader);
     }
 
     private void RunPipeReader()
@@ -83,7 +83,7 @@ public partial class AssistantViewModel : ViewModelBase
         // Read asynchronously in background
         _ = Task.Run(async () =>
         {
-            using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
+            await using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
                 useAsync: true);
             using var reader = new StreamReader(fs, Encoding.UTF8);
             Console.WriteLine("Listening to pipe");
