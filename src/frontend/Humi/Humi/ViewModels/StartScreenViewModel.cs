@@ -61,7 +61,7 @@ public class StartScreenViewModel : ViewModelBase
             }
         };
 
-    private void StartAnalysis()
+    private void ShowScreenPicker()
     {
         var screenSelectorWindow = new Views.ScreenSelector();
         screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
