@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Humi.Analyzer;
@@ -24,12 +25,20 @@ using GraphData = System.Collections.Generic.Dictionary<string, System.Collectio
 public partial class StartScreenViewModel : ViewModelBase
 {
     private bool analysisStarted;
+    private string summary = "Podsumowanie pojawi się tutaj po zakończeniu analizy.";
     private AssistantViewModel assistantViewModel;
     
     public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
     public BackendWorker BackendWorker { get; } = new BackendWorker();
     public RelayCommand StartAnalysisCommand { get; }
     public ObservableCollection<string> PostAnalysisTips { get; } = new ObservableCollection<string>();
+    
+    public string Summary
+    {
+        get => summary;
+        set => SetProperty(ref summary, value);
+    }
+    
     private readonly GraphDataLoaderUtility _graphLoader =  new GraphDataLoaderUtility();
     [ObservableProperty] public GraphData data;
     [ObservableProperty] public string choosenDate;
@@ -145,6 +154,13 @@ public partial class StartScreenViewModel : ViewModelBase
         
         analysisStarted = true;
         Analyzer.Start();
+        BackendWorker.SummaryReceived += (summary) =>
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                Summary = summary;
+            });
+        };
         var screenSelectorWindow = new Views.ScreenSelector();
         screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
             OperatingSystem.IsMacOS() ? new MacOsScreenshotUtility() :

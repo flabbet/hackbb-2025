@@ -115,6 +115,10 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <TextBlock Classes="appTextBlock" Text="Podsumowanie AI" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <Border Classes="smallcard">
+              <TextBlock Text="{Binding Summary}" Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16"/>
+            </Border>
           </StackPanel>
         </Border>
         <Border IsVisible="{Binding IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">

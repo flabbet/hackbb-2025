@@ -1,30 +1,28 @@
 #!/bin/bash
 
-VENV_DIR="venv"
-REQ_FILE="requirements.txt"
+VENV_DIR="venv-llm"
+REQ_FILE="requirements-llm.txt"
 
 echo "Starting backend install..."
-echo "Model train data will be pulled from kaggle..."
+echo "Installing ollama"
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.2
 
 SCRIPT_DIR="$(pwd)"
 
-curl -L -o /tmp/fer2013.zip https://www.kaggle.com/api/v1/datasets/download/msambare/fer2013 > /dev/null
+$WHISPER_MODEL="ggml-small.bin"
+if [ ! -f "./models/ggml-$WHISPER_MODEL.bin" ]; then
+    echo "Downloading the '$WHISPER_MODEL' Whisper model for whisper.cpp..."
+    $SCRIPT_DIR/download-ggml-model.sh $WHISPER_MODEL
+else
+    echo "Whisper model '$WHISPER_MODEL' already downloaded."
+fi
 
 echo "Model data pull finished successfully."
 echo "Model data unpacking..."
 
-mkdir $SCRIPT_DIR/data/
-
-unzip /tmp/fer2013.zip -d $SCRIPT_DIR/data/ > /dev/null
-
 echo "Unpack finished successfully."
 echo "Creating python virtual env..."
-
-if ! command -v python3 &> /dev/null
-then
-    echo "Python3 could not be found. Please install it first."
-    exit 1
-fi
 
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating virtual environment in $VENV_DIR..."
