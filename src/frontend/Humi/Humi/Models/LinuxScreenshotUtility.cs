@@ -69,8 +69,6 @@ namespace Humi.Models
             int height = XDisplayHeight(display, 0);
             IntPtr root = XRootWindow(display, 0);
             
-            Console.WriteLine(width + "x" + height);
-
             IntPtr ximagePtr = XGetImage(display, root, 0, 0, (uint)width, (uint)height, ulong.MaxValue, ZPixmap);
             if (ximagePtr == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to get XImage.");

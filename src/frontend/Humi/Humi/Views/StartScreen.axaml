@@ -170,19 +170,20 @@
       <Border Grid.Column="1"/>
 
       <Border Grid.Column="2" Classes="card" Padding="20">
-        <StackPanel>
-          <TextBlock Classes="appTextBlock" Text="Wykres emocji zespołu" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
-          <TextBlock Classes="appTextBlock" IsVisible="{Binding !IsMetupAnalysisActive}" Text="Wykres przedstawia procentowy udział emocji w wybranym spotkaniu."
+        <Grid RowDefinitions="Auto,Auto,Auto,*">          
+          <TextBlock Grid.Row="0" Classes="appTextBlock" Text="Wykres emocji zespołu" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+          <TextBlock Grid.Row="1" Classes="appTextBlock" IsVisible="{Binding !IsMetupAnalysisActive}" Text="Wykres przedstawia procentowy udział emocji w wybranym spotkaniu."
                      Foreground="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,14"/>
-          <TextBlock Classes="appTextBlock" IsVisible="{Binding IsMetupAnalysisActive}" Text="Wykres przedstawia procentowy udział emocji w aktualnym spotkaniu."
-                     Foreground="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,14"/>
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8" Margin="0,0,0,14">
-            <ComboBox SelectedIndex="0" Width="220" Height="36" Background="#1E1E1E" Foreground="{StaticResource PrimaryText}">
-              <ComboBoxItem Content="13.09.2025 12:09" />
-              <ComboBoxItem Content="10.09.2025 09:30" />
-            </ComboBox>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8" Margin="0,0,0,14">
+            <ComboBox
+              Width="220"
+              Height="36"
+              Background="#1E1E1E"
+              Foreground="{StaticResource PrimaryText}"
+              ItemsSource="{Binding AvailableDates}"
+              SelectedItem="{Binding ChoosenDate, Mode=TwoWay}" />
           </StackPanel>
-          <lvc:CartesianChart
+          <lvc:CartesianChart Grid.Row="3"
               LegendPosition="Hidden"
               MinWidth="100"
               MinHeight="430"
@@ -191,7 +192,7 @@
               XAxes="{Binding XAxes}"
               YAxes="{Binding YAxes}">
           </lvc:CartesianChart>
-        </StackPanel>
+        </Grid>
       </Border>
     </Grid>
   </Grid>
