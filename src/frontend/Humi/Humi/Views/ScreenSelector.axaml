@@ -34,7 +34,7 @@
         <ItemsControl Grid.Row="1" ItemsSource="{Binding Screens}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="2" ColumnSpacing="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <UniformGrid Columns="{Binding Screens.Count}" ColumnSpacing="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
