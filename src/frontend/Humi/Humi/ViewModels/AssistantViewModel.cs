@@ -36,7 +36,7 @@ public partial class AssistantViewModel : ViewModelBase
 
     private Window owningWindow;
 
-    public AssistantViewModel(Window window)
+    public AssistantViewModel(Window window, int screenId)
     {
         owningWindow = window;
         Analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
@@ -51,13 +51,12 @@ public partial class AssistantViewModel : ViewModelBase
                 "Witaj! Jestem Twoim asystentem do spraw nastroju w zespole. Będę Cię informować o nastrojach panujących w zespole oraz sugerować działania, które mogą poprawić atmosferę."
         }));
 
-        StartBackend();
+        StartBackend(screenId);
     }
 
-    public void StartBackend()
+    public void StartBackend(int screen)
     {
-        var SelectedScreen = 0;
-        var arguments = $"backend/run_backend.sh analyze {SelectedScreen + 1}";
+        var arguments = $"backend/run_backend.sh analyze {screen}";
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = "/bin/bash",

@@ -19,23 +19,23 @@ public class ScreenSelectorViewModel : ViewModelBase
         owningWindow = window;
         for (int i = 0; i < window.Screens.ScreenCount; i++)
         {
-            int handle = (int?)(window.Screens.All[i].TryGetPlatformHandle())?.Handle ?? 0;
+            int handle = (int?)window.Screens.All[i].TryGetPlatformHandle()?.Handle ?? 0;
             var screenData = new ScreenData
             {
-                ScreenId = handle,
+                ScreenId = i,
                 Preview = screenshotUtility.CaptureScreen(handle),
                 Name = window.Screens.All[i].DisplayName,
-                SelectScreenCommand = new RelayCommand(SelectScreen)
+                SelectScreenCommand = new RelayCommand(() => SelectScreen(i))
             };
             
             Screens.Add(screenData);
         }
     }
     
-    private void SelectScreen()
+    private void SelectScreen(int id)
     {
         AssistantWindow assistantWindow = new AssistantWindow();
-        assistantWindow.DataContext = new AssistantViewModel(assistantWindow);
+        assistantWindow.DataContext = new AssistantViewModel(assistantWindow, id);
         
         owningWindow.Close();
         
