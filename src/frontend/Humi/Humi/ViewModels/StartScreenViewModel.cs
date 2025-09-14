@@ -1,5 +1,8 @@
 using System;
 using System.Timers;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,15 +16,42 @@ using Humi.Models;
 
 namespace Humi.ViewModels;
 
+using GraphData = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<int>>;
+
 public partial class StartScreenViewModel : ViewModelBase
 {
+    private readonly GraphDataLoaderUtility _graphLoader =  new GraphDataLoaderUtility();
+    [ObservableProperty] public GraphData data;
+    [ObservableProperty] public string choosenDate;
+    [ObservableProperty] public ObservableCollection<string> availableDates = [];
+    [ObservableProperty] public ISeries[] series;
+    
     public RelayCommand StartAnalysisCommand { get; }
+    
 
     private readonly Timer _timer;
     private TimeSpan _elapsedTime;
 
     public StartScreenViewModel()
     {
+        Data = _graphLoader.LoadFiles("../../../../../../../data/");
+        foreach (var key in Data.Keys)
+        {
+            AvailableDates.Add(key);
+        }
+        ChoosenDate = AvailableDates.FirstOrDefault();
+        Series = new ISeries[]
+        {
+            new LineSeries<int>
+            {
+                Values = Data[ChoosenDate],
+                Fill = null,
+                Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
+                GeometryFill = new SolidColorPaint(SKColors.White),
+                GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
+            }
+        };
+
         _timer = new Timer(1000);
         _timer.Elapsed += TimerElapsed;
         _elapsedTime = TimeSpan.Zero;
@@ -35,19 +65,21 @@ public partial class StartScreenViewModel : ViewModelBase
 
     [ObservableProperty] private string _meetupDuration;
 
-    public ISeries[] Series { get; set; }
-        = new ISeries[]
+    partial void OnChoosenDateChanged(string oldValue, string newValue)
+    {
+        Series = new ISeries[]
         {
             new LineSeries<int>
             {
+                Values = Data[ChoosenDate],
                 Fill = null,
                 Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
-                Values = new[] { 55, 69, 71, 83, 4, 90, 10 },
                 GeometryFill = new SolidColorPaint(SKColors.White),
                 GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
-            },
+            }
         };
-
+    } 
+    
     public Axis[] XAxes { get; set; }
         = new Axis[]
         {
@@ -69,7 +101,7 @@ public partial class StartScreenViewModel : ViewModelBase
         {
             new Axis
             {
-                MinStep = 20,
+                MinStep = 10,
                 LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
                 TextSize = 12,
                 SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
