@@ -1,7 +1,8 @@
-# Humi
+<img src="https://github.com/user-attachments/assets/596fe8b6-eae6-4b3d-88d4-043ca960e351" width="100px" />
 
-Hi, I’m **Humi**! 👋
-This is a **project for HackBB 2025**. I help team leaders read emotions and run meetings so everyone feels heard.
+Hi, I’m **Humi**!
+
+I help team leaders read emotions and run meetings so everyone feels heard.
 
 * Real-time emotion hints via a desktop widget
 * Post-meeting mood and emotion analysis
