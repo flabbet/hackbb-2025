@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
@@ -20,12 +21,14 @@ public class ScreenSelectorViewModel : ViewModelBase
         for (int i = 0; i < window.Screens.ScreenCount; i++)
         {
             int handle = (int?)window.Screens.All[i].TryGetPlatformHandle()?.Handle ?? 0;
+
+            var iCopy = System.OperatingSystem.IsLinux() ? i + 1 : i;
             var screenData = new ScreenData
             {
                 ScreenId = i,
-                Preview = screenshotUtility.CaptureScreen(handle),
+                Preview = screenshotUtility.CaptureScreen(i),
                 Name = window.Screens.All[i].DisplayName,
-                SelectScreenCommand = new RelayCommand(() => SelectScreen(i))
+                SelectScreenCommand = new RelayCommand(() => SelectScreen(iCopy))
             };
             
             Screens.Add(screenData);
