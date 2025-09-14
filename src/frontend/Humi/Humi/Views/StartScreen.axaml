@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Humi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -87,22 +88,22 @@
 
         <Border Classes="card" Margin="0,6,0,0">
           <StackPanel>
-            <TextBlock Text="Rady na podstawie spotkań" FontSize="20" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <TextBlock Text="Rady na podstawie spotkań" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
             <StackPanel Spacing="10">
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Wczoraj kilka osób wyglądało na smutne lub znużone. Warto wprowadzić krótsze, bardziej angażujące sesje lub sprawdzić, co obniżało ich motywację.
                 </TextBlock>
               </Border>
 
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Dziś grupa miała momenty niskiego zaangażowania. Warto wprowadzić krótkie przerwy lub mini-ankiety w kolejnych spotkaniach.
                 </TextBlock>
               </Border>
 
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="14">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Spróbuj zwiększyć udział mniej aktywnych uczestników, zadając im pytania otwarte.
                 </TextBlock>
               </Border>
@@ -124,7 +125,15 @@
               <ComboBoxItem Content="10.09.2025 09:30" />
             </ComboBox>
           </StackPanel>
-            <Svg Path="/Assets/BarLineChart.svg"></Svg>
+          <lvc:CartesianChart
+              LegendPosition="Hidden"
+              MinWidth="100"
+              MinHeight="430"
+              Background="#2F2F2F"
+              Series="{Binding Series}"
+              XAxes="{Binding XAxes}"
+              YAxes="{Binding YAxes}">
+          </lvc:CartesianChart>
         </StackPanel>
       </Border>
     </Grid>
