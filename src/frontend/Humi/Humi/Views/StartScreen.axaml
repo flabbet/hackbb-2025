@@ -5,6 +5,7 @@
         xmlns:fluent="using:FluentIcons.Avalonia"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Humi.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Humi.Views.StartScreen"
         x:DataType="viewModels:StartScreenViewModel"
@@ -99,26 +100,21 @@
 
         <Border IsVisible="{Binding !IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">
           <StackPanel>
-            <TextBlock Classes="appTextBlock" Text="Rady na podstawie spotkań" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-            <StackPanel Spacing="10">
-              <Border Classes="smallcard">
-                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
-                  Wczoraj kilka osób wyglądało na smutne lub znużone. Warto wprowadzić krótsze, bardziej angażujące sesje lub sprawdzić, co obniżało ich motywację.
-                </TextBlock>
-              </Border>
-
-              <Border Classes="smallcard">
-                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
-                  Dziś grupa miała momenty niskiego zaangażowania. Warto wprowadzić krótkie przerwy lub mini-ankiety w kolejnych spotkaniach.
-                </TextBlock>
-              </Border>
-
-              <Border Classes="smallcard">
-                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
-                  Spróbuj zwiększyć udział mniej aktywnych uczestników, zadając im pytania otwarte.
-                </TextBlock>
-              </Border>
-            </StackPanel>
+            <TextBlock Classes="appTextBlock" Text="Analiza spotkania" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ItemsControl ItemsSource="{Binding PostAnalysisTips}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Vertical" Spacing="10"/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="system:String">
+                  <Border Classes="smallcard">
+                    <TextBlock Text="{Binding}" Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16"/>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </StackPanel>
         </Border>
         <Border IsVisible="{Binding IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">

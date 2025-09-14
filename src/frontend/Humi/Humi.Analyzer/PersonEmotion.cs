@@ -15,5 +15,5 @@ public enum Emotion
     Happy = 4,
     Neutral = 5,
     Sad = 6,
-    Surprise = 7
+    Surprised = 7
 }

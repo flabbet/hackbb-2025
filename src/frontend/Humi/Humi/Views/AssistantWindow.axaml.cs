@@ -1,7 +1,9 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Humi.Utility;
 using Humi.ViewModels;
 
 namespace Humi.Views;
@@ -24,6 +26,15 @@ public partial class AssistantWindow : Window
         AlignToBottomRight();
     }
 
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        if (OperatingSystem.IsMacOS())
+        {
+            MacOSTransparencyHelper.MakeAvaloniaWindowTransparent(this);
+        }
+    }
+
     public void AlignToBottomRight()
     {
         PixelSize screenSize = Screens.Primary.Bounds.Size;
@@ -32,5 +43,13 @@ public partial class AssistantWindow : Window
         Position = new PixelPoint(
             screenSize.Width - windowSize.Width,
             screenSize.Height - windowSize.Height);
+    }
+
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            BeginMoveDrag(e);
+        }
     }
 }

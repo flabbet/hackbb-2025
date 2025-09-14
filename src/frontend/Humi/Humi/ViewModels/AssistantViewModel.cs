@@ -8,6 +8,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using Humi.Analyzer;
+using Humi.Models;
 
 namespace Humi.ViewModels;
 
@@ -17,6 +18,17 @@ public partial class AssistantViewModel : ViewModelBase
 
     private string notificationText =
         "Wygląda na to, że zespół jest w ponurych humorach, spróbuj poprowadzić to spotkanie w luźniejszej formie. Możesz również pochwalić za ostatnie sukcesy";
+
+    private string notificationLottie;
+    
+    private IDisposable notificationTimer;
+    
+    
+    public string NotificationLottie 
+    {
+        get => notificationLottie;
+        set => SetProperty(ref notificationLottie, value);
+    }
 
     public string NotificationText
     {
@@ -32,18 +44,18 @@ public partial class AssistantViewModel : ViewModelBase
 
     public RelayCommand CloseCommand { get; set; }
 
-    public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
 
     private Window owningWindow;
+    
 
-    public AssistantViewModel(Window window, int screenId)
+    public AssistantViewModel(Window window, int screenId, EmotionAnalyzer analyzer, BackendWorker worker)
     {
         owningWindow = window;
-        Analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
+        analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
 
         CloseCommand = new RelayCommand(CloseNotification);
 
-        Analyzer.Start();
+        analyzer.Start();
 
         Dispatcher.UIThread.Post(() => ShowNotification(new OutstandingEvent()
         {
@@ -51,68 +63,28 @@ public partial class AssistantViewModel : ViewModelBase
                 "Witaj! Jestem Twoim asystentem do spraw nastroju w zespole. Będę Cię informować o nastrojach panujących w zespole oraz sugerować działania, które mogą poprawić atmosferę."
         }));
 
-        StartBackend(screenId);
-    }
-
-    public void StartBackend(int screen)
-    {
-        var arguments = $"backend/run_backend.sh analyze {screen}";
-        ProcessStartInfo startInfo = new ProcessStartInfo
-        {
-            FileName = "/bin/bash",
-            Arguments = arguments,
-            WorkingDirectory = "../../../../../..",
-            UseShellExecute = true,
-            CreateNoWindow = true,
-        };
-
-        Process process = new Process
-        {
-            StartInfo = startInfo
-        };
-
-        process.Start();
-
-        Dispatcher.UIThread.Post(RunPipeReader);
-    }
-
-    private void RunPipeReader()
-    {
-        string pipePath = "/tmp/emotions_feed";
-
-        // Read asynchronously in background
-        _ = Task.Run(async () =>
-        {
-            await using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
-                useAsync: true);
-            using var reader = new StreamReader(fs, Encoding.UTF8);
-            Console.WriteLine("Listening to pipe");
-            while (true)
-            {
-                if (reader.EndOfStream)
-                {
-                    await Task.Delay(10); // Avoid busy waiting
-                    continue;
-                }
-
-                string? line = await reader.ReadLineAsync();
-                if (line != null)
-                    Analyzer.ProcessEventRaw(line);
-            }
-        });
+        worker.StartBackend(screenId);
     }
 
     private void ShowNotification(OutstandingEvent e)
     {
         owningWindow.Width = 550;
         NotificationText = e.EventText;
+        NotificationLottie = LottieFromEmotion(e.NotificationEmotion);
         IsShown = true;
-        DispatcherTimer.RunOnce(CloseNotification, TimeSpan.FromSeconds(15));
+        notificationTimer?.Dispose();
+        notificationTimer = DispatcherTimer.RunOnce(CloseNotification, TimeSpan.FromSeconds(15));
+    }
+    
+    private string LottieFromEmotion(Emotion emotion)
+    {
+        return "/Assets/humi_talking.json";
     }
 
     private void CloseNotification()
     {
         NotificationText = "";
+        NotificationLottie = "/Assets/humi_idle.json";
         owningWindow.Width = 200;
         IsShown = false;
     }
