@@ -167,6 +167,8 @@ public partial class StartScreenViewModel : ViewModelBase
     [RelayCommand]
     private void StopAnalysis()
     {
+        AssistantWindowManager.Assistant.Close();
+        AssistantWindowManager.Assistant = null;
         _timer.Stop();
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
         BackendWorker.StopBackend();
