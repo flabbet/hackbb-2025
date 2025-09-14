@@ -115,7 +115,7 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="693">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="450 ">
               <ItemsControl ItemsSource="{Binding PostAnalysisTips}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
