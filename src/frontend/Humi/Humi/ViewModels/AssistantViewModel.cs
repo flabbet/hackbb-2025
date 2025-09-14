@@ -8,6 +8,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using Humi.Analyzer;
+using Humi.Models;
 
 namespace Humi.ViewModels;
 
@@ -32,18 +33,18 @@ public partial class AssistantViewModel : ViewModelBase
 
     public RelayCommand CloseCommand { get; set; }
 
-    public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
 
     private Window owningWindow;
+    
 
-    public AssistantViewModel(Window window, int screenId)
+    public AssistantViewModel(Window window, int screenId, EmotionAnalyzer analyzer, BackendWorker worker)
     {
         owningWindow = window;
-        Analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
+        analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
 
         CloseCommand = new RelayCommand(CloseNotification);
 
-        Analyzer.Start();
+        analyzer.Start();
 
         Dispatcher.UIThread.Post(() => ShowNotification(new OutstandingEvent()
         {
@@ -51,55 +52,7 @@ public partial class AssistantViewModel : ViewModelBase
                 "Witaj! Jestem Twoim asystentem do spraw nastroju w zespole. Będę Cię informować o nastrojach panujących w zespole oraz sugerować działania, które mogą poprawić atmosferę."
         }));
 
-        StartBackend(screenId);
-    }
-
-    public void StartBackend(int screen)
-    {
-        var arguments = $"backend/run_backend.sh analyze {screen}";
-        ProcessStartInfo startInfo = new ProcessStartInfo
-        {
-            FileName = "/bin/bash",
-            Arguments = arguments,
-            WorkingDirectory = "../../../../../..",
-            UseShellExecute = true,
-            CreateNoWindow = true,
-        };
-
-        Process process = new Process
-        {
-            StartInfo = startInfo
-        };
-
-        process.Start();
-
-        Dispatcher.UIThread.Post(RunPipeReader);
-    }
-
-    private void RunPipeReader()
-    {
-        string pipePath = "/tmp/emotions_feed";
-
-        // Read asynchronously in background
-        _ = Task.Run(async () =>
-        {
-            await using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
-                useAsync: true);
-            using var reader = new StreamReader(fs, Encoding.UTF8);
-            Console.WriteLine("Listening to pipe");
-            while (true)
-            {
-                if (reader.EndOfStream)
-                {
-                    await Task.Delay(10); // Avoid busy waiting
-                    continue;
-                }
-
-                string? line = await reader.ReadLineAsync();
-                if (line != null)
-                    Analyzer.ProcessEventRaw(line);
-            }
-        });
+        worker.StartBackend(screenId);
     }
 
     private void ShowNotification(OutstandingEvent e)

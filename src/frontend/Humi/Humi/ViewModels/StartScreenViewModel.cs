@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using Humi.Analyzer;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -13,10 +14,17 @@ namespace Humi.ViewModels;
 public class StartScreenViewModel : ViewModelBase
 {
     public RelayCommand StartAnalysisCommand { get; }
+    
+    private bool analysisStarted;
+    private AssistantViewModel assistantViewModel;
+    
+    public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
+    public BackendWorker BackendWorker { get; } = new BackendWorker();
 
     public StartScreenViewModel()
     {
         StartAnalysisCommand = new RelayCommand(ShowScreenPicker);
+        BackendWorker.DataReceived += Analyzer.ProcessEventRaw;
     }
     
     public ISeries[] Series { get; set; }
@@ -34,7 +42,7 @@ public class StartScreenViewModel : ViewModelBase
         {
             new Axis
             {
-                Labels = ["Neutralny", "Szczęśliwy","Przerażony", "Zły","Zaskoczony", "Smutnt"],
+                Labels = ["Neutralny", "Szczęśliwy","Przerażony", "Zły","Zaskoczony", "Smutny"],
                 LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
                 TextSize = 12,
                 SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
@@ -63,10 +71,19 @@ public class StartScreenViewModel : ViewModelBase
 
     private void ShowScreenPicker()
     {
+        if (analysisStarted)
+        {
+            BackendWorker.StopBackend();
+            Analyzer.Stop();
+            return;
+        };
+        
+        analysisStarted = true;
+        Analyzer.Start();
         var screenSelectorWindow = new Views.ScreenSelector();
         screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
             OperatingSystem.IsMacOS() ? new MacOsScreenshotUtility() :
-            OperatingSystem.IsLinux() ? new LinuxScreenshotUtility() : null);
+            OperatingSystem.IsLinux() ? new LinuxScreenshotUtility() : null, Analyzer, BackendWorker);
 
         screenSelectorWindow.Topmost = true;
 

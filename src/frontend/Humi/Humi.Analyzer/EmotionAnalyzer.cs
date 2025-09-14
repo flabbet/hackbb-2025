@@ -3,14 +3,20 @@
 public class EmotionAnalyzer
 {
     public System.Timers.Timer OutstandingEventTimer { get; private set; }
-    public Dictionary<int, List<PersonEmotion>> LatestData { get; private set; } = new Dictionary<int, List<PersonEmotion>>();
+
+    public Dictionary<int, List<PersonEmotion>> LatestData { get; private set; } =
+        new Dictionary<int, List<PersonEmotion>>();
     
+    public List<OutstandingEvent> PostAnalysisEvents { get; private set; } = new List<OutstandingEvent>();
+
     public event Action<OutstandingEvent> OnOutstandingEvent;
 
     private DateTime firstEntryTime;
+    private bool initialEmotionProcessed = false;
 
-    public TimeSpan TimeSinceStart => LatestData == null || LatestData.Count == 0 ? TimeSpan.Zero : DateTime.Now - firstEntryTime;
-    
+    public TimeSpan TimeSinceStart =>
+        LatestData == null || LatestData.Count == 0 ? TimeSpan.Zero : DateTime.Now - firstEntryTime;
+
 
     public EmotionAnalyzer()
     {
@@ -21,6 +27,12 @@ public class EmotionAnalyzer
     public void Start()
     {
         OutstandingEventTimer.Start();
+    }
+    
+    public void Stop()
+    {
+        OutstandingEventTimer.Stop();
+        AnalyzeWholeData();
     }
 
     // personId:emotionString
@@ -53,24 +65,50 @@ public class EmotionAnalyzer
     private void ProcessOutstandingEvents()
     {
         bool handled = false;
-        if (TimeSinceStart < TimeSpan.FromSeconds(50))
+        if (TimeSinceStart < TimeSpan.FromSeconds(50) && !initialEmotionProcessed)
         {
             handled = ProcessInitialEmotions(LatestData);
-            if (handled) return;
+            if (handled)
+            {
+                initialEmotionProcessed = true;
+                return;
+            }
         }
+
+        handled = ProcessSuddenMoodChanges();
+        if (handled) return;
     }
     
+    private void AnalyzeWholeData()
+    {
+        if (LatestData.Count == 0) return;
+
+        foreach (var (id, data) in LatestData)
+        {
+            var mostFrequentEmotion = GetDominantEmotion(data);
+            if (mostFrequentEmotion is Emotion.Sad or Emotion.Fear)
+            {
+                PostAnalysisEvents.Add(new OutstandingEvent
+                {
+                    EventText =
+                        $"Wygląda na to, że osoba {id} przez większość czasu smutna i wystraszona, porozmawiaj z nim/nią, być może potrzebuje trochę czasu wolnego aby rozwiązać swoje sprawy. Na pewno pozytywnie to wpłynie na późniejszą produktywność i relacje.",
+                    NotificationEmotion = mostFrequentEmotion
+                });
+            }
+        }
+    }
+
     /*private List<PersonEmotion> GatherDataFromInterval(DateTime startTime, TimeSpan duration)
     {
         DateTime endTime = startTime + duration;
         return LatestData.Where(e => e.Timestamp >= startTime && e.Timestamp <= endTime).ToList();
     }
-    
+
     private bool ProcessEmotionTransitions(List<PersonEmotion> lastIntervalData, List<PersonEmotion> latestIntervalData)
     {
         Emotion dominantEmotionLast = GetDominantEmotion(lastIntervalData);
         Emotion dominantEmotionLatest = GetDominantEmotion(latestIntervalData);
-        
+
         if(SomeoneGotAngered(dominantEmotionLast, dominantEmotionLatest))
         {
             OnOutstandingEvent?.Invoke(new OutstandingEvent
@@ -80,10 +118,59 @@ public class EmotionAnalyzer
             });
             return true;
         }
-        
+
         return false;
     }*/
-    
+
+    private bool ProcessSuddenMoodChanges()
+    {
+        if (LatestData.Count == 0) return false;
+
+        DateTime now = DateTime.Now;
+        DateTime tenSecondsAgo = now - TimeSpan.FromSeconds(5);
+        DateTime twentySecondsAgo = now - TimeSpan.FromSeconds(10);
+
+        Dictionary<int, List<PersonEmotion>> lastTenSecondsData = new();
+        Dictionary<int, List<PersonEmotion>> previousTenSecondsData = new();
+
+        foreach (var kvp in LatestData)
+        {
+            var recentEmotions = kvp.Value.Where(e => e.Timestamp >= tenSecondsAgo).ToList();
+            if (recentEmotions.Count > 0)
+            {
+                lastTenSecondsData[kvp.Key] = recentEmotions;
+            }
+
+            var earlierEmotions = kvp.Value.Where(e => e.Timestamp >= twentySecondsAgo && e.Timestamp < tenSecondsAgo)
+                .ToList();
+            if (earlierEmotions.Count > 0)
+            {
+                previousTenSecondsData[kvp.Key] = earlierEmotions;
+            }
+        }
+
+        Emotion[] dominantLastTen = GetDominantEmotionsOfMajority(lastTenSecondsData).Take(2).ToArray();
+        Emotion[] dominantPreviousTen = GetDominantEmotionsOfMajority(previousTenSecondsData).Take(2).ToArray();
+        
+        if (dominantLastTen.Length == 0 || dominantPreviousTen.Length == 0) return false;
+        
+        bool isSurprisedAndAngry = dominantLastTen.Contains(Emotion.Surprised) && dominantLastTen.Contains(Emotion.Angry);
+        bool wasSurprisedAndAngry = dominantPreviousTen.Contains(Emotion.Surprised) && dominantPreviousTen.Contains(Emotion.Angry);
+
+        if (isSurprisedAndAngry && !wasSurprisedAndAngry)
+        {
+            OnOutstandingEvent?.Invoke(new OutstandingEvent
+            {
+                EventText =
+                    "Większość osób jest zdziwiona i niezadowolona, spróbuj doprecyzować nieścisłości i rozszerz kontekst jeżeli to możliwe.",
+                NotificationEmotion = Emotion.Surprised
+            });
+            return true;
+        }
+
+        return false;
+    }
+
     private bool ProcessInitialEmotions(Dictionary<int, List<PersonEmotion>> data)
     {
         Emotion dominantEmotion = GetDominantEmotionOfMajority(data);
@@ -91,11 +178,14 @@ public class EmotionAnalyzer
         {
             OnOutstandingEvent?.Invoke(new OutstandingEvent
             {
-                EventText = "Wygląda na to, że zespół jest w ponurych humorach, spróbuj poprowadzić to spotkanie w luźniejszej formie. Możesz również pochwalić za ostatnie sukcesy",
+                EventText =
+                    "Wygląda na to, że zespół jest w ponurych humorach, spróbuj poprowadzić to spotkanie w luźniejszej formie. Możesz również pochwalić za ostatnie sukcesy",
                 NotificationEmotion = Emotion.Sad
             });
+            
             return true;
         }
+
         return false;
     }
 
@@ -107,14 +197,33 @@ public class EmotionAnalyzer
             if (personData.Count == 0) continue;
             Emotion getDominant = GetDominantEmotion(personData);
             emotionCounts.TryAdd(getDominant, 0);
-            
+
             emotionCounts[getDominant]++;
         }
-        
+
         if (emotionCounts.Count == 0) return Emotion.Neutral;
         return emotionCounts.OrderByDescending(e => e.Value).First().Key;
     }
-    
+
+    private Emotion[] GetDominantEmotionsOfMajority(Dictionary<int, List<PersonEmotion>> data)
+    {
+        Dictionary<Emotion, int> emotionCounts = new();
+        foreach (var personData in data.Values)
+        {
+            if (personData.Count == 0) continue;
+            Emotion[] emotions = GetDominantEmotions(personData);
+
+            foreach (var emotion in emotions)
+            {
+                emotionCounts.TryAdd(emotion, 0);
+                emotionCounts[emotion]++;
+            }
+        }
+
+        if (emotionCounts.Count == 0) return [Emotion.Neutral];
+        return emotionCounts.OrderByDescending(e => e.Value).Select(e => e.Key).ToArray();
+    }
+
     private Emotion GetDominantEmotion(List<PersonEmotion> data)
     {
         if (data == null || data.Count == 0) return Emotion.Neutral;
@@ -127,6 +236,20 @@ public class EmotionAnalyzer
         }
 
         return emotionCounts.OrderByDescending(e => e.Value).First().Key;
+    }
+
+    private Emotion[] GetDominantEmotions(List<PersonEmotion> data)
+    {
+        if (data == null || data.Count == 0) return [Emotion.Neutral];
+
+        Dictionary<Emotion, int> emotionCounts = new();
+        foreach (var entry in data)
+        {
+            emotionCounts.TryAdd(entry.DominantEmotion, 0);
+            emotionCounts[entry.DominantEmotion]++;
+        }
+
+        return emotionCounts.OrderByDescending(e => e.Value).Select(e => e.Key).ToArray();
     }
 }
 
