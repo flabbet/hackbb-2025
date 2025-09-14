@@ -87,7 +87,7 @@
       <StackPanel Grid.Column="0" Spacing="18">
         <Button IsVisible="{Binding !IsMetupAnalysisActive}" Background="#3A5A40" Classes="primary appTextBlock" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StartAnalysisCommand}">
           <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-            <fluent:FluentIcon  Icon="Video" IconVariant="Regular" IconSize="Size32"/>
+            <fluent:FluentIcon Icon="Video" IconVariant="Regular" IconSize="Size32"/>
             <TextBlock Classes="appTextBlock" Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
           </StackPanel>
         </Button>
