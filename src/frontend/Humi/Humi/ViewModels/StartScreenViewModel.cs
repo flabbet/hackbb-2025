@@ -1,29 +1,34 @@
+using System;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using Humi.Models;
 
 namespace Humi.ViewModels;
 
 public class StartScreenViewModel : ViewModelBase
 {
     public RelayCommand StartAnalysisCommand { get; }
-    
+
     public StartScreenViewModel()
     {
-        StartAnalysisCommand = new RelayCommand(StartAnalysis);
+        StartAnalysisCommand = new RelayCommand(ShowScreenPicker);
     }
 
-    private void StartAnalysis()
+    private void ShowScreenPicker()
     {
-        var assistantWindow = new Views.AssistantWindow();
-        assistantWindow.DataContext = new AssistantViewModel(assistantWindow);
-        
-        assistantWindow.Topmost = true;
-        
-        if (App.Current.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        var screenSelectorWindow = new Views.ScreenSelector();
+        screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
+            OperatingSystem.IsMacOS() ? new MacOsScreenshotUtility() :
+            OperatingSystem.IsLinux() ? new LinuxScreenshotUtility() : null);
+
+        screenSelectorWindow.Topmost = true;
+
+        if (App.Current.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow.WindowState = WindowState.Minimized;
         }
-        
-        assistantWindow.Show();
+
+        screenSelectorWindow.Show();
     }
 }
