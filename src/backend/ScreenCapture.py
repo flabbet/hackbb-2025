@@ -1,4 +1,6 @@
 import mss
+import numpy as np
+import cv2
 
 class ScreenCapture:
     def __init__(self, monitor_index=1):
