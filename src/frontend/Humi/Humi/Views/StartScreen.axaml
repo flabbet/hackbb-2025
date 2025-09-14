@@ -101,7 +101,7 @@
         <Border IsVisible="{Binding !IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">
           <StackPanel>
             <TextBlock Classes="appTextBlock" Text="Analiza spotkania" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="693">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="450 ">
               <ItemsControl ItemsSource="{Binding PostAnalysisTips}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
