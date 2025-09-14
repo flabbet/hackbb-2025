@@ -6,6 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,14 +24,11 @@
         <PackageReference Include="FluentIcons.Avalonia" Version="1.1.308" />
         <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc6.1" />
         <PackageReference Include="Lottie" Version="11.3.0.2" />
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc6.1" />
         <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.0.4" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Humi.Analyzer\Humi.Analyzer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Models\" />
     </ItemGroup>
 </Project>

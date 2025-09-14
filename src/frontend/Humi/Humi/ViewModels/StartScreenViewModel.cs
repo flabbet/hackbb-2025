@@ -9,15 +9,17 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.Painting.Effects;
 using SkiaSharp;
+using Humi.Models;
 
 namespace Humi.ViewModels;
 
 public partial class StartScreenViewModel : ViewModelBase
 {
     public RelayCommand StartAnalysisCommand { get; }
-    
+
     private readonly Timer _timer;
     private TimeSpan _elapsedTime;
+
     public StartScreenViewModel()
     {
         _timer = new Timer(1000);
@@ -27,31 +29,31 @@ public partial class StartScreenViewModel : ViewModelBase
         StartAnalysisCommand = new RelayCommand(StartAnalysis);
     }
 
-    [ObservableProperty]
-    private bool _isMetupAnalysisActive = false;
+    [ObservableProperty] private bool _isMetupAnalysisActive = false;
 
-    [ObservableProperty]
-    private int _numberOfPeopleInMeetup = 0;
+    [ObservableProperty] private int _numberOfPeopleInMeetup = 0;
 
-    [ObservableProperty]
-    private string _meetupDuration;
+    [ObservableProperty] private string _meetupDuration;
 
     public ISeries[] Series { get; set; }
-        = new ISeries[] { new LineSeries<int> {
-            Fill = null,
-            Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
-            Values = new[] { 55, 69, 71, 83, 4, 90, 10 },
-            GeometryFill = new SolidColorPaint(SKColors.White),
-            GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
-                } ,
-            };
+        = new ISeries[]
+        {
+            new LineSeries<int>
+            {
+                Fill = null,
+                Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
+                Values = new[] { 55, 69, 71, 83, 4, 90, 10 },
+                GeometryFill = new SolidColorPaint(SKColors.White),
+                GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
+            },
+        };
 
     public Axis[] XAxes { get; set; }
         = new Axis[]
         {
             new Axis
             {
-                Labels = ["Neutralny", "Szczęśliwy","Przerażony", "Zły","Zaskoczony", "Smutn"],
+                Labels = ["Neutralny", "Szczęśliwy", "Przerażony", "Zły", "Zaskoczony", "Smutnt"],
                 LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
                 TextSize = 12,
                 SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
@@ -63,29 +65,41 @@ public partial class StartScreenViewModel : ViewModelBase
         };
 
     public Axis[] YAxes { get; set; }
-            = new Axis[]
+        = new Axis[]
+        {
+            new Axis
             {
-                new Axis
+                MinStep = 20,
+                LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
+                TextSize = 12,
+                SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
                 {
-                    MinStep=20,
-                    LabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 178)),
-                    TextSize = 12,
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) 
-                    {
-                        StrokeThickness = 2, 
-                        PathEffect = new DashEffect(new float[] { 2, 2 })
-                    }
+                    StrokeThickness = 2,
+                    PathEffect = new DashEffect(new float[] { 2, 2 })
                 }
-            };
+            }
+        };
 
     private void StartAnalysis()
     {
-        var assistantWindow = new Views.AssistantWindow();
-        assistantWindow.DataContext = new AssistantViewModel(assistantWindow);
-        
-        assistantWindow.Topmost = true;
-        
-        if (App.Current.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        ShowScreenPicker();
+        IsMetupAnalysisActive = !IsMetupAnalysisActive;
+        _timer.Start();
+        _elapsedTime = TimeSpan.Zero;
+        MeetupDuration = "00:00";
+    } 
+    
+    private void ShowScreenPicker()
+    {
+        var screenSelectorWindow = new Views.ScreenSelector();
+        screenSelectorWindow.DataContext = new ScreenSelectorViewModel(screenSelectorWindow,
+            OperatingSystem.IsMacOS() ? new MacOsScreenshotUtility() :
+            OperatingSystem.IsLinux() ? new LinuxScreenshotUtility() : null);
+
+        screenSelectorWindow.Topmost = true;
+
+        if (App.Current.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow.WindowState = WindowState.Minimized;
         }
@@ -94,7 +108,7 @@ public partial class StartScreenViewModel : ViewModelBase
         _timer.Start();
         _elapsedTime = TimeSpan.Zero;
         MeetupDuration = "00:00";
-        assistantWindow.Show();
+        screenSelectorWindow.Show();
     }
 
     [RelayCommand]

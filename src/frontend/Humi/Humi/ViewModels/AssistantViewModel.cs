@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
@@ -33,7 +36,7 @@ public partial class AssistantViewModel : ViewModelBase
 
     private Window owningWindow;
 
-    public AssistantViewModel(Window window)
+    public AssistantViewModel(Window window, int screenId)
     {
         owningWindow = window;
         Analyzer.OnOutstandingEvent += (e) => { Dispatcher.UIThread.Invoke(() => ShowNotification(e)); };
@@ -48,19 +51,19 @@ public partial class AssistantViewModel : ViewModelBase
                 "Witaj! Jestem Twoim asystentem do spraw nastroju w zespole. Będę Cię informować o nastrojach panujących w zespole oraz sugerować działania, które mogą poprawić atmosferę."
         }));
 
-        //StartBackend();
+        StartBackend(screenId);
     }
 
-    private void StartBackend()
+    public void StartBackend(int screen)
     {
+        var arguments = $"backend/run_backend.sh analyze {screen}";
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
-            FileName = "bash",
-            Arguments = "run_backend.sh",
-            WorkingDirectory = "/Users/flabbet/Git/Emotion-detection/src",
-            UseShellExecute = false,
+            FileName = "/bin/bash",
+            Arguments = arguments,
+            WorkingDirectory = "../../../../../..",
+            UseShellExecute = true,
             CreateNoWindow = true,
-            RedirectStandardOutput = true
         };
 
         Process process = new Process
@@ -68,16 +71,35 @@ public partial class AssistantViewModel : ViewModelBase
             StartInfo = startInfo
         };
 
-        process.OutputDataReceived += (sender, args) =>
-        {
-            if (!string.IsNullOrEmpty(args.Data))
-            {
-                Analyzer.ProcessEventRaw(args.Data);
-            }
-        };
-
         process.Start();
-        process.BeginOutputReadLine();
+
+        Dispatcher.UIThread.Post(RunPipeReader);
+    }
+
+    private void RunPipeReader()
+    {
+        string pipePath = "/tmp/emotions_feed";
+
+        // Read asynchronously in background
+        _ = Task.Run(async () =>
+        {
+            await using var fs = new FileStream(pipePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
+                useAsync: true);
+            using var reader = new StreamReader(fs, Encoding.UTF8);
+            Console.WriteLine("Listening to pipe");
+            while (true)
+            {
+                if (reader.EndOfStream)
+                {
+                    await Task.Delay(10); // Avoid busy waiting
+                    continue;
+                }
+
+                string? line = await reader.ReadLineAsync();
+                if (line != null)
+                    Analyzer.ProcessEventRaw(line);
+            }
+        });
     }
 
     private void ShowNotification(OutstandingEvent e)

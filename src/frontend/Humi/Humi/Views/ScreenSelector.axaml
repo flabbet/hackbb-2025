@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Humi.ViewModels"
+        xmlns:models="clr-namespace:Humi.Models"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="viewModels:ScreenSelectorViewModel"
+        x:Class="Humi.Views.ScreenSelector"
+        Background="#1c1c1c"
+        Title="ScreenSelector">
+
+    <Design.DataContext>
+        <viewModels:ScreenSelectorViewModel />
+    </Design.DataContext>
+
+    <Window.Resources>
+        <Color x:Key="BgColor">#171717</Color>
+        <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+        <Color x:Key="MutedTextColor">#BFBFBF</Color>
+        <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}" />
+        <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+    </Window.Resources>
+
+    <Grid RowDefinitions="Auto, *" Margin="24">
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Spacing="16" Margin="0,30,0,40">
+            <Image Source="/Assets/Humi.png" Width="140" Height="140" />
+            <TextBlock Text="Wybierz ekran, na którym będzie spotkanie"
+                       FontSize="28" Foreground="{StaticResource PrimaryTextBrush}"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Screens}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="{Binding Screens.Count}" ColumnSpacing="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:ScreenData">
+                    <Button Background="{StaticResource BgBrush}" Command="{Binding SelectScreenCommand}" CornerRadius="12">
+                        <Border Padding="20" >
+                            <Grid VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Image Source="{Binding Preview}" Stretch="Uniform" />
+
+                                <TextBlock Grid.Row="1" Text="{Binding Name}"
+                                           FontSize="20" Foreground="{StaticResource PrimaryTextBrush}"
+                                           Margin="0,12,0,0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Window>
