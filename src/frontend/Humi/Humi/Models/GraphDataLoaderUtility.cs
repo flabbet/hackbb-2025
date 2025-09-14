@@ -15,7 +15,10 @@ namespace Humi.Models
         public GraphData LoadFiles(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
-                throw new DirectoryNotFoundException($"Directory not found: {directoryPath}");
+            {
+                Directory.CreateDirectory(directoryPath);
+                return LoadedData;
+            }
 
             var files = Directory.GetFiles(directoryPath, "*.txt");
 

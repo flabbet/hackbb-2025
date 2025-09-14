@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Timers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -43,23 +44,27 @@ public partial class StartScreenViewModel : ViewModelBase
     {
         BackendWorker.DataReceived += Analyzer.ProcessEventRaw;
         Analyzer.OnPersonCountChanged += count => NumberOfPeopleInMeetup = count;
-        Data = _graphLoader.LoadFiles("../../../../../../../data/");
+        Data = _graphLoader.LoadFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Humi", "data"));
         foreach (var key in Data.Keys)
         {
             AvailableDates.Add(key);
         }
-        ChoosenDate = AvailableDates.FirstOrDefault();
-        Series = new ISeries[]
+
+        if (AvailableDates.Count > 0)
         {
-            new LineSeries<int>
+            ChoosenDate = AvailableDates.FirstOrDefault();
+            Series = new ISeries[]
             {
-                Values = Data[ChoosenDate],
-                Fill = null,
-                Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
-                GeometryFill = new SolidColorPaint(SKColors.White),
-                GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
-            }
-        };
+                new LineSeries<int>
+                {
+                    Values = Data[ChoosenDate],
+                    Fill = null,
+                    Stroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 },
+                    GeometryFill = new SolidColorPaint(SKColors.White),
+                    GeometryStroke = new SolidColorPaint(new SKColor(101, 143, 100, 255)) { StrokeThickness = 4 }
+                }
+            };
+        }
 
         _timer = new Timer(1000);
         _timer.Elapsed += TimerElapsed;
