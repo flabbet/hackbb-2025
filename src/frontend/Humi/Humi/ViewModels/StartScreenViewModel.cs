@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Timers;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,13 +17,14 @@ namespace Humi.ViewModels;
 
 public partial class StartScreenViewModel : ViewModelBase
 {
-    public RelayCommand StartAnalysisCommand { get; }
     
     private bool analysisStarted;
     private AssistantViewModel assistantViewModel;
     
     public EmotionAnalyzer Analyzer { get; } = new EmotionAnalyzer();
     public BackendWorker BackendWorker { get; } = new BackendWorker();
+    public RelayCommand StartAnalysisCommand { get; }
+    public ObservableCollection<string> PostAnalysisTips { get; } = new ObservableCollection<string>();
 
     private readonly Timer _timer;
     private TimeSpan _elapsedTime;
@@ -30,6 +32,7 @@ public partial class StartScreenViewModel : ViewModelBase
     public StartScreenViewModel()
     {
         BackendWorker.DataReceived += Analyzer.ProcessEventRaw;
+        Analyzer.OnPersonCountChanged += count => NumberOfPeopleInMeetup = count;
         _timer = new Timer(1000);
         _timer.Elapsed += TimerElapsed;
         _elapsedTime = TimeSpan.Zero;
@@ -88,6 +91,7 @@ public partial class StartScreenViewModel : ViewModelBase
             }
         };
 
+
     private void StartAnalysis()
     {
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
@@ -101,8 +105,6 @@ public partial class StartScreenViewModel : ViewModelBase
     {
         if (analysisStarted)
         {
-            BackendWorker.StopBackend();
-            Analyzer.Stop();
             return;
         };
         
@@ -132,6 +134,17 @@ public partial class StartScreenViewModel : ViewModelBase
     {
         _timer.Stop();
         IsMetupAnalysisActive = !IsMetupAnalysisActive;
+        BackendWorker.StopBackend();
+        Analyzer.Stop();
+        
+        PostAnalysisTips.Clear();
+        foreach (var tip in Analyzer.PostAnalysisEvents)
+        {
+            PostAnalysisTips.Add(tip.EventText);
+        }
+        
+        analysisStarted = false;
+        NumberOfPeopleInMeetup = 0;
     }
 
     private void TimerElapsed(object sender, ElapsedEventArgs e)

@@ -10,9 +10,11 @@ public class EmotionAnalyzer
     public List<OutstandingEvent> PostAnalysisEvents { get; private set; } = new List<OutstandingEvent>();
 
     public event Action<OutstandingEvent> OnOutstandingEvent;
+    public event Action<int> OnPersonCountChanged;
 
     private DateTime firstEntryTime;
     private bool initialEmotionProcessed = false;
+    private int lastPersonCount = 0;
 
     public TimeSpan TimeSinceStart =>
         LatestData == null || LatestData.Count == 0 ? TimeSpan.Zero : DateTime.Now - firstEntryTime;
@@ -65,6 +67,13 @@ public class EmotionAnalyzer
     private void ProcessOutstandingEvents()
     {
         bool handled = false;
+        var dataFromLastInterval = GatherDataFromInterval(DateTime.Now - TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
+        if (dataFromLastInterval.Count != lastPersonCount)
+        {
+            OnPersonCountChanged?.Invoke(dataFromLastInterval.Count);
+            lastPersonCount = dataFromLastInterval.Count;
+        }
+        
         if (TimeSinceStart < TimeSpan.FromSeconds(50) && !initialEmotionProcessed)
         {
             handled = ProcessInitialEmotions(LatestData);
@@ -91,36 +100,43 @@ public class EmotionAnalyzer
                 PostAnalysisEvents.Add(new OutstandingEvent
                 {
                     EventText =
-                        $"Wygląda na to, że osoba {id} przez większość czasu smutna i wystraszona, porozmawiaj z nim/nią, być może potrzebuje trochę czasu wolnego aby rozwiązać swoje sprawy. Na pewno pozytywnie to wpłynie na późniejszą produktywność i relacje.",
+                        $"Wygląda na to, że osoba {id} przez większość czasu była smutna i wystraszona, porozmawiaj z nim/nią, być może potrzebuje trochę czasu wolnego aby rozwiązać swoje sprawy. Na pewno pozytywnie to wpłynie na późniejszą produktywność i relacje.",
                     NotificationEmotion = mostFrequentEmotion
                 });
             }
         }
+        
+        var dominantEmotion = GetDominantEmotionOfMajority(LatestData);
+        if (dominantEmotion == Emotion.Happy)
+        {
+            PostAnalysisEvents.Add(new OutstandingEvent
+            {
+                EventText =
+                    "Większość osób wydaje się być zadowolona, świetna robota! Utrzymuj pozytywną atmosferę i kontynuuj dobrą pracę.",
+                NotificationEmotion = dominantEmotion
+            });
+        }
     }
 
-    /*private List<PersonEmotion> GatherDataFromInterval(DateTime startTime, TimeSpan duration)
+    private Dictionary<int, PersonEmotion> GatherDataFromInterval(DateTime startTime, TimeSpan duration)
     {
         DateTime endTime = startTime + duration;
-        return LatestData.Where(e => e.Timestamp >= startTime && e.Timestamp <= endTime).ToList();
+        Dictionary<int, PersonEmotion> result = new();
+        
+        foreach (var kvp in LatestData)
+        {
+            var recentEmotions = kvp.Value.Where(e => e.Timestamp >= startTime && e.Timestamp < endTime).ToList();
+            if (recentEmotions.Count > 0)
+            {
+                // Get the most recent emotion in the interval
+                var latestEmotion = recentEmotions.OrderByDescending(e => e.Timestamp).First();
+                result[kvp.Key] = latestEmotion;
+            }
+        }
+        
+        return result;
     }
 
-    private bool ProcessEmotionTransitions(List<PersonEmotion> lastIntervalData, List<PersonEmotion> latestIntervalData)
-    {
-        Emotion dominantEmotionLast = GetDominantEmotion(lastIntervalData);
-        Emotion dominantEmotionLatest = GetDominantEmotion(latestIntervalData);
-
-        if(SomeoneGotAngered(dominantEmotionLast, dominantEmotionLatest))
-        {
-            OnOutstandingEvent?.Invoke(new OutstandingEvent
-            {
-                EventText = "Someone is angry. Run away!",
-                NotificationEmotion = Emotion.Angry
-            });
-            return true;
-        }
-
-        return false;
-    }*/
 
     private bool ProcessSuddenMoodChanges()
     {
