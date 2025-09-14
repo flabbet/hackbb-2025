@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:fluent="using:FluentIcons.Avalonia"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Humi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -21,7 +22,7 @@
     <Color x:Key="MutedCardColor">#333333</Color>
     <Color x:Key="AccentGreen">#43724F</Color>
     <Color x:Key="AccentLightGreen">#7BB073</Color>
-    <Color x:Key="TextPrimary">#EAEAEA</Color>
+    <Color x:Key="TextPrimary">#FFFFFF</Color>
     <Color x:Key="TextMuted">#A8A8A8</Color>
 
     <SolidColorBrush x:Key="WindowBackground" Color="{StaticResource BgColor}" />
@@ -39,6 +40,10 @@
       <Setter Property="Foreground" Value="{StaticResource PrimaryText}" />
       <Setter Property="FontSize" Value="28" />
       <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="TextBlock.appTextBlock">
+      <Setter Property="FontFamily" Value="Montserrat" />
     </Style>
 
     <Style Selector="Border.card">
@@ -69,7 +74,7 @@
         <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
           <Image Source="/Assets/Humi.png"
                  Width="92" Height="92" Stretch="UniformToFill"/>
-          <TextBlock Text="Humi" FontSize="56" VerticalAlignment="Center"
+          <TextBlock Text="Humi" FontSize="56" VerticalAlignment="Center" Classes="appTextBlock"
                      Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="6,0,0,0"/>
         </StackPanel>
         <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
@@ -79,35 +84,85 @@
 
     <Grid Grid.Row="1" Margin="24" ColumnDefinitions="380,16,*">
       <StackPanel Grid.Column="0" Spacing="18">
-        <Button Classes="primary" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StartAnalysisCommand}">
+        <Button IsVisible="{Binding !IsMetupAnalysisActive}" Background="#3A5A40" Classes="primary appTextBlock" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StartAnalysisCommand}">
           <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-            <TextBlock Text="🎥" FontSize="20" VerticalAlignment="Center"/>
-            <TextBlock Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
+            <fluent:FluentIcon  Icon="Video" IconVariant="Regular" IconSize="Size32"/>
+            <TextBlock Classes="appTextBlock" Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
+          </StackPanel>
+        </Button>
+        <Button IsVisible="{Binding IsMetupAnalysisActive}" Background="#CE3F38" Classes="primary" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StopAnalysisCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <fluent:FluentIcon  Icon="VideoOff" IconVariant="Regular" IconSize="Size32"/>
+            <TextBlock Classes="appTextBlock" Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
           </StackPanel>
         </Button>
 
-        <Border Classes="card" Margin="0,6,0,0">
+        <Border IsVisible="{Binding !IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">
           <StackPanel>
-            <TextBlock Text="Rady na podstawie spotkań" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <TextBlock Classes="appTextBlock" Text="Rady na podstawie spotkań" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
             <StackPanel Spacing="10">
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
+                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Wczoraj kilka osób wyglądało na smutne lub znużone. Warto wprowadzić krótsze, bardziej angażujące sesje lub sprawdzić, co obniżało ich motywację.
                 </TextBlock>
               </Border>
 
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
+                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Dziś grupa miała momenty niskiego zaangażowania. Warto wprowadzić krótkie przerwy lub mini-ankiety w kolejnych spotkaniach.
                 </TextBlock>
               </Border>
 
               <Border Classes="smallcard">
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
+                <TextBlock Classes="appTextBlock" TextWrapping="Wrap" Foreground="{StaticResource PrimaryText}" FontSize="16">
                   Spróbuj zwiększyć udział mniej aktywnych uczestników, zadając im pytania otwarte.
                 </TextBlock>
               </Border>
             </StackPanel>
+          </StackPanel>
+        </Border>
+        <Border IsVisible="{Binding IsMetupAnalysisActive}" Classes="card" Margin="0,6,0,0">
+          <StackPanel>
+            <TextBlock Classes="appTextBlock" Text="Aktualne spotkanie" FontSize="24" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <StackPanel Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="12">
+                <fluent:FluentIcon Icon="Timer" IconVariant="Regular" Foreground="{StaticResource PrimaryText}" IconSize="Size24"/>
+                <TextBlock Classes="appTextBlock" Width="120" FontWeight="Bold" VerticalAlignment="Center" FontSize="32" Text="{Binding MeetupDuration}" Foreground="{StaticResource PrimaryText}"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="12">
+                <fluent:FluentIcon Icon="Person" IconVariant="Regular" Foreground="{StaticResource PrimaryText}" IconSize="Size24"/>
+                <TextBlock Classes="appTextBlock" FontWeight="Bold" VerticalAlignment="Center" FontSize="32" Text="{Binding NumberOfPeopleInMeetup}" Foreground="{StaticResource PrimaryText}"/>
+              </StackPanel>
+            </StackPanel>
+            <Grid VerticalAlignment="Center"
+                  HorizontalAlignment="Center"
+                  Margin="24,24,24,24"
+                  RowDefinitions="*,*"
+                  ColumnDefinitions="*,*">
+                <Grid.Styles >
+                  <Style Selector="TextBlock.emotionText">
+                    <Setter Property="Foreground" Value="{StaticResource PrimaryText}" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Padding" Value="14,12" />
+                  </Style>
+                </Grid.Styles>
+                <StackPanel  HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0" >
+                  <Lottie Path="/Assets/humi_neutral.json" />
+                  <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" Text="Neutralny"/>
+                </StackPanel>
+                <StackPanel  HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1">
+                  <Lottie Path="/Assets/humi_happy.json" />
+                  <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" Text="Szczęśliwy"/>
+                </StackPanel>
+                <StackPanel  HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">
+                  <Lottie Path="/Assets/humi_sad.json" />
+                  <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" Text="Smutny"/>
+                </StackPanel>
+                <StackPanel  HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1">
+                  <Lottie Path="/Assets/humi_suprised.json" />
+                  <TextBlock HorizontalAlignment="Center" Classes="emotionText appTextBlock" Text="Zaskoczony"/>
+                </StackPanel>
+            </Grid>
           </StackPanel>
         </Border>
       </StackPanel>
@@ -116,8 +171,10 @@
 
       <Border Grid.Column="2" Classes="card" Padding="20">
         <StackPanel>
-          <TextBlock Text="Wykres emocji zespołu" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
-          <TextBlock Text="Wykres przedstawia procentowy udział emocji w wybranym spotkaniu." 
+          <TextBlock Classes="appTextBlock" Text="Wykres emocji zespołu" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+          <TextBlock Classes="appTextBlock" IsVisible="{Binding !IsMetupAnalysisActive}" Text="Wykres przedstawia procentowy udział emocji w wybranym spotkaniu."
+                     Foreground="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,14"/>
+          <TextBlock Classes="appTextBlock" IsVisible="{Binding IsMetupAnalysisActive}" Text="Wykres przedstawia procentowy udział emocji w aktualnym spotkaniu."
                      Foreground="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,14"/>
           <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8" Margin="0,0,0,14">
             <ComboBox SelectedIndex="0" Width="220" Height="36" Background="#1E1E1E" Foreground="{StaticResource PrimaryText}">
