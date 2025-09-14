@@ -134,7 +134,7 @@ public partial class StartScreenViewModel : ViewModelBase
         _elapsedTime = TimeSpan.Zero;
         MeetupDuration = "00:00";
         ShowScreenPicker();
-    } 
+    }
     
     private void ShowScreenPicker()
     {
@@ -180,6 +180,23 @@ public partial class StartScreenViewModel : ViewModelBase
         
         analysisStarted = false;
         NumberOfPeopleInMeetup = 0;
+        ShowSummaryScreen();
+    }
+    
+    private void ShowSummaryScreen()
+    {
+        var summaryScreen = new Views.SummaryScreen();
+        summaryScreen.DataContext = new ViewModels.SummaryScreenViewModel();
+
+        summaryScreen.Topmost = true;
+
+        if (App.Current.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow.WindowState = WindowState.Minimized;
+        }
+        
+        summaryScreen.Show();
     }
 
     private void TimerElapsed(object sender, ElapsedEventArgs e)
