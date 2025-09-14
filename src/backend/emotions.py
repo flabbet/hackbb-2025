@@ -10,24 +10,11 @@ from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
 import sys
-import mss
+
+from FaceTracker import FaceTracker
+from ScreenCapture import ScreenCapture
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-
-class ScreenCapture:
-    def __init__(self, monitor_index=1):
-        self.sct = mss.mss()
-        self.monitor = self.sct.monitors[monitor_index]
-
-    def read(self):
-        """Mimic cv2.VideoCapture.read()"""
-        img = np.array(self.sct.grab(self.monitor))
-        frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-        return True, frame 
-        
-    def release(self):
-        """Mimic cv2.VideoCapture.release()"""
-        self.sct.close()
 
 # command line argument
 ap = argparse.ArgumentParser()
@@ -35,31 +22,6 @@ ap.add_argument("--mode",help="train/display/analyze")
 ap.add_argument("--screen",help="0/1/2")
 mode = ap.parse_args().mode
 screen_id = int(ap.parse_args().screen)
-
-# plots accuracy and loss curves
-def plot_model_history(model_history):
-    """
-    Plot Accuracy and Loss curves given the model_history
-    """
-    fig, axs = plt.subplots(1,2,figsize=(15,5))
-    # summarize history for accuracy
-    axs[0].plot(range(1,len(model_history.history['accuracy'])+1),model_history.history['accuracy'])
-    axs[0].plot(range(1,len(model_history.history['val_accuracy'])+1),model_history.history['val_accuracy'])
-    axs[0].set_title('Model Accuracy')
-    axs[0].set_ylabel('Accuracy')
-    axs[0].set_xlabel('Epoch')
-    axs[0].set_xticks(np.arange(1,len(model_history.history['accuracy'])+1),len(model_history.history['accuracy'])/10)
-    axs[0].legend(['train', 'val'], loc='best')
-    # summarize history for loss
-    axs[1].plot(range(1,len(model_history.history['loss'])+1),model_history.history['loss'])
-    axs[1].plot(range(1,len(model_history.history['val_loss'])+1),model_history.history['val_loss'])
-    axs[1].set_title('Model Loss')
-    axs[1].set_ylabel('Loss')
-    axs[1].set_xlabel('Epoch')
-    axs[1].set_xticks(np.arange(1,len(model_history.history['loss'])+1),len(model_history.history['loss'])/10)
-    axs[1].legend(['train', 'val'], loc='best')
-    fig.savefig('plot.png')
-    plt.show()
 
 # Define data generators
 train_dir = 'backend/data/train'
@@ -93,20 +55,19 @@ model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48,48,1)))
 model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.35))
+model.add(Dropout(0.60))
 
 model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.30))
+model.add(Dropout(0.25))
 
 model.add(Flatten())
 model.add(Dense(1024, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(7, activation='softmax'))
 
-# If you want to train the same model or try other models, go for this
 if mode == "train":
     model.compile(loss='categorical_crossentropy',optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
     model_info = model.fit_generator(
@@ -115,31 +76,27 @@ if mode == "train":
             epochs=num_epoch,
             validation_data=validation_generator,
             validation_steps=num_val // batch_size)
-    plot_model_history(model_info)
     model.save_weights('backend/model.h5')
 
-# emotions will be displayed on your face from the webcam feed
 elif mode == "display" or mode == "analyze":
     model.load_weights('backend/model.h5')
 
-    # prevents openCL usage and unnecessary logging messages
     cv2.ocl.setUseOpenCL(False)
 
     # dictionary which assigns each label an emotion (alphabetical order)
     emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
-    # start the webcam feed
-    # cap = cv2.VideoCapture(0)
     cap = ScreenCapture(screen_id)
+    tracker = FaceTracker(max_distance=400, max_missing=20)
 
     while True:
-        # Find haar cascade to draw bounding box around face
         ret, frame = cap.read()
         if not ret:
             break
         facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = facecasc.detectMultiScale(gray,scaleFactor=1.3, minNeighbors=5)
+        tracks = tracker.update(faces)
 
         for index, (x, y, w, h) in enumerate(faces):
             if mode == "display":
@@ -148,10 +105,12 @@ elif mode == "display" or mode == "analyze":
             cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
             prediction = model.predict(cropped_img, verbose=0)
             maxindex = int(np.argmax(prediction))
-            if mode == "display":
-                cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            face_id = tracker.getByDetection((x,y,w,h))
 
-            sys.stdout.write(str(index) + ":" + str(emotion_dict[maxindex] + "\n"))
+            if mode == "display":
+                cv2.putText(frame, str(face_id) + " " + emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+            sys.stdout.write(str(face_id) + ":" + str(emotion_dict[maxindex] + "\n"))
             sys.stdout.flush()
 
         if mode == "display":
