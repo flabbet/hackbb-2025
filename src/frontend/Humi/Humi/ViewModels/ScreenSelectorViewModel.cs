@@ -23,10 +23,11 @@ public class ScreenSelectorViewModel : ViewModelBase
             int handle = (int?)window.Screens.All[i].TryGetPlatformHandle()?.Handle ?? 0;
 
             var iCopy = System.OperatingSystem.IsLinux() ? i + 1 : i;
+            var screenshotHandle = System.OperatingSystem.IsMacOS() ? handle : iCopy;
             var screenData = new ScreenData
             {
                 ScreenId = i,
-                Preview = screenshotUtility.CaptureScreen(i),
+                Preview = screenshotUtility.CaptureScreen(screenshotHandle),
                 Name = window.Screens.All[i].DisplayName,
                 SelectScreenCommand = new RelayCommand(() => SelectScreen(iCopy))
             };
