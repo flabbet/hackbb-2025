@@ -94,7 +94,7 @@
         <Button IsVisible="{Binding IsMetupAnalysisActive}" Background="#CE3F38" Classes="primary" HorizontalAlignment="Stretch" MinHeight="56" Command="{Binding StopAnalysisCommand}">
           <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
             <fluent:FluentIcon  Icon="VideoOff" IconVariant="Regular" IconSize="Size32"/>
-            <TextBlock Classes="appTextBlock" Text="Rozpocznij analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
+            <TextBlock Classes="appTextBlock" Text="Zakończ analizę spotkania" VerticalAlignment="Center" FontSize="16"/>
           </StackPanel>
         </Button>
 
